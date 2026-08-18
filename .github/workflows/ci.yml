@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: python -m unittest tests.test_smoke -v
+      - run: python -m unittest tests.test_smoke tests.test_runtimes -v
 
   frontend:
     runs-on: ubuntu-latest

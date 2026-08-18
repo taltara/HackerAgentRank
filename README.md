@@ -16,18 +16,20 @@ HackerRank's hiring-agent is a strong intern scoring pipeline. It is also a sing
 
 - **Multi-rubric** — score one CV against several roles in one pass
 - **A catalog you can extend** — drop a folder in `backend/cv_eval/rubrics/`
-- **Local models** — Ollama by default; tolerates models that ignore JSON-schema mode
+- **Local or BYOK cloud** — Ollama by default; Gemini 3.5 Flash or Ollama Cloud if you paste a key for that run
 - **Two surfaces** — web wizard and `python -m cv_eval`
 
 ## Requirements
 
 - **Python 3.11+**
-- **[Ollama](https://ollama.com)** with a pulled model — `gemma4:latest` is the default
 - **Node.js 20+** (web UI only)
+- An LLM: **[Ollama](https://ollama.com)** with a pulled model (`gemma4:latest` is the local default), **or** a Gemini / Ollama Cloud API key pasted on wizard step 03
 
 ## Quick start
 
-Ollama must be running with a model pulled:
+Local Gemma 4 is the default path. No GPU? Skip the Ollama pull and paste a Gemini or Ollama Cloud key on step 03. The key is used for that evaluation only — never written to disk, `.env`, logs, or SSE.
+
+Ollama (optional if you use a cloud key):
 
 ```bash
 ollama serve
@@ -97,6 +99,8 @@ python -m cv_eval evaluate <cv.pdf> [options]
    -r, --role NAME      rubric to score (repeatable)
        --compare        score against every rubric
    -m, --model NAME     LLM model (default: local auto-detect)
+       --runtime NAME   local | ollama_cloud | gemini (default: local)
+       --api-key KEY    per-run cloud key (prefer GEMINI_API_KEY / OLLAMA_API_KEY)
        --no-github      skip GitHub enrichment
        --html-out PATH  write an HTML report
        --json-out PATH  write the raw JSON result
@@ -110,13 +114,13 @@ python -m cv_eval models
 | Method | Path               | Returns                          |
 | ------ | ------------------ | -------------------------------- |
 | GET    | `/health`          | status, default model, role names |
-| GET    | `/models`          | available models                  |
+| GET    | `/models`          | local models plus `runtimes` catalogs |
 | GET    | `/roles`           | rubric summaries (incl. department) |
 | POST   | `/evaluate`        | JSON result                       |
 | POST   | `/evaluate/stream` | SSE: `plan`, `stage`, `partial`, `complete`, `error` |
 | POST   | `/evaluate/html`   | HTML report                       |
 
-`POST` bodies are multipart: `file` (PDF), `roles` (comma-separated names or `all`), `enrich` (`true`/`false`), `model` (optional).
+`POST` bodies are multipart: `file` (PDF), `roles` (comma-separated names or `all`), `enrich` (`true`/`false`), `model` (optional), `runtime` (`local` | `ollama_cloud` | `gemini`), `api_key` (cloud only, this request). Cloud keys are not stored, not copied to env, not logged, and not included in SSE events.
 
 ## Rubrics
 
@@ -161,7 +165,7 @@ flowchart LR
 
     R[("cv_eval/rubrics/")] --> PIPE
     PIPE --> OUT["EvaluationResult"]
-    PIPE -.->|"LLM calls"| OL["Ollama<br/>local model"]
+    PIPE -.->|"LLM calls"| OL["Ollama local<br/>or Gemini / Ollama Cloud"]
 ```
 
 Extraction is one LLM call per resume section; scoring is one call per selected rubric. Local models frequently ignore JSON-schema mode, so the provider retries without it and the parser recovers JSON from free-text-wrapped replies — a model that cannot honour the schema still yields a parseable evaluation.
@@ -170,7 +174,7 @@ LLM scores vary by model and temperature. Treat them as a structured critique, n
 
 ## Sample output
 
-`POST /evaluate` returns `{ candidate_name, model, github_enriched, resume, github, evaluations[] }`. One entry from `evaluations[]`, produced by `gemma4:31b-mlx` against the `backend_engineer` rubric:
+`POST /evaluate` returns `{ candidate_name, model, runtime, github_enriched, resume, github, evaluations[] }`. One entry from `evaluations[]`, produced by `gemma4:31b-mlx` against the `backend_engineer` rubric:
 
 ```json
 {
@@ -233,7 +237,7 @@ cv-evaluator/
 ```bash
 # backend
 cd backend && source .venv/bin/activate
-python -m unittest tests.test_smoke -v
+python -m unittest tests.test_smoke tests.test_runtimes -v
 
 # frontend
 cd frontend
@@ -244,7 +248,7 @@ npm run build
 
 ## Status
 
-v0.1. Local-first. No accounts, no hosted scoring, no auth. The API binds to localhost and is not safe to expose to the internet as-is.
+v0.1. Local-first by default. Cloud models are opt-in per run via a pasted key that is never stored. The API binds to localhost and is not safe to expose to the internet as-is.
 
 ## Contributing
 

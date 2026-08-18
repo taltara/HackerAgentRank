@@ -22,10 +22,12 @@ It has **zero runtime dependencies** and never reimplements pipeline logic.
 
 - **Python 3.11+**
 - **Node.js 20+**
-- **[Ollama](https://ollama.com)** running with at least one model pulled
+- **[Ollama](https://ollama.com)** with a pulled model, **or** a Gemini / Ollama Cloud key on wizard step 03
 
-The launcher checks all three before doing anything and tells you exactly what
-is missing.
+The launcher checks Python and Node before doing anything. Local Ollama is
+optional for the web UI: if it is missing, you can still paste a cloud key.
+The CLI still requires Ollama unless you pass `--runtime gemini` or
+`--runtime ollama_cloud`.
 
 ## Usage
 

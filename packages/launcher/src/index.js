@@ -66,7 +66,7 @@ export async function up({
   const python = await preflight({
     needsNode: !apiOnly,
     needsPython: !webOnly,
-    needsOllama: !webOnly,
+    ollama: webOnly ? "skip" : "optional",
   });
   const appDir = await resolveApp({ cacheDir: CACHE_DIR, refresh });
   const apiUrl = `http://127.0.0.1:${apiPort}`;
@@ -116,9 +116,19 @@ export async function up({
   superviseUntilExit(children);
 }
 
+function cliUsesCloud(args) {
+  const index = args.indexOf("--runtime");
+  if (index === -1) return false;
+  const value = args[index + 1];
+  return value === "gemini" || value === "ollama_cloud";
+}
+
 /** Run the Python CLI with the given arguments, provisioning it if needed. */
 export async function cli(args, { refresh }) {
-  const python = await preflight({ needsNode: false });
+  const python = await preflight({
+    needsNode: false,
+    ollama: cliUsesCloud(args) ? "skip" : "required",
+  });
   const appDir = await resolveApp({ cacheDir: CACHE_DIR, refresh });
   const { backend, interpreter } = await prepareBackend({ appDir, python });
 

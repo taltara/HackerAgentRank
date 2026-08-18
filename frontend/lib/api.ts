@@ -39,6 +39,8 @@ export interface EvaluateOptions {
   roles?: string[] | "all";
   enrich?: boolean;
   model?: string;
+  runtime?: string;
+  apiKey?: string;
 }
 
 function toForm(opts: EvaluateOptions): FormData {
@@ -50,6 +52,10 @@ function toForm(opts: EvaluateOptions): FormData {
   );
   form.append("enrich", String(opts.enrich ?? true));
   if (opts.model) form.append("model", opts.model);
+  form.append("runtime", opts.runtime ?? "local");
+  if (opts.runtime && opts.runtime !== "local" && opts.apiKey) {
+    form.append("api_key", opts.apiKey);
+  }
   return form;
 }
 

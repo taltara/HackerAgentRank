@@ -3,7 +3,7 @@
 Endpoints
 ---------
     GET  /health           liveness + which model is default
-    GET  /models           models we can target (providers.json + local Ollama)
+    GET  /models           local Ollama tags plus cloud runtime catalogs
     GET  /roles            rubric summaries (for the UI's picker)
     POST /evaluate         multipart: ``file`` (PDF) + ``roles`` + options
                             -> JSON EvaluationResult
@@ -28,8 +28,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 from cv_eval import report
 from cv_eval.pipeline import evaluate
-from cv_eval.providers import available_models, default_model
+from cv_eval.providers import default_model, models_payload
 from cv_eval.roles import list_roles, load_role, role_summary
+from cv_eval.runtimes import redact_secret
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -69,7 +70,7 @@ def health() -> dict:
 
 @app.get("/models")
 def models() -> dict:
-    return {"default": default_model(), "available": available_models()}
+    return models_payload()
 
 
 @app.get("/roles")
@@ -111,17 +112,40 @@ async def _load_pdf(file: UploadFile) -> bytes:
     return data
 
 
-def _run(data: bytes, roles_param: Optional[str], enrich: bool, model: Optional[str]):
+def _run(
+    data: bytes,
+    roles_param: Optional[str],
+    enrich: bool,
+    model: Optional[str],
+    runtime: str = "local",
+    api_key: Optional[str] = None,
+):
     try:
         role_names = _resolve_roles(roles_param)
-        return evaluate(data, role_names, enrich=enrich, model=model)
+        return evaluate(
+            data,
+            role_names,
+            enrich=enrich,
+            model=model,
+            runtime=runtime,
+            api_key=api_key,
+        )
     except HTTPException:
         raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400, detail=redact_secret(str(e), api_key)
+        ) from e
     except RuntimeError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
+        raise HTTPException(
+            status_code=422, detail=redact_secret(str(e), api_key)
+        ) from e
     except Exception as e:  # noqa: BLE001
-        logger.exception("Evaluation failed")
-        raise HTTPException(status_code=500, detail=f"Evaluation failed: {e}") from e
+        logger.error("Evaluation failed: %s", redact_secret(str(e), api_key), exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Evaluation failed: {redact_secret(str(e), api_key)}",
+        ) from e
 
 
 @app.post("/evaluate")
@@ -130,9 +154,11 @@ async def evaluate_endpoint(
     roles_param: str = Form("all", alias="roles"),
     enrich: bool = Form(True),
     model: Optional[str] = Form(None),
+    runtime: str = Form("local"),
+    api_key: Optional[str] = Form(None),
 ) -> JSONResponse:
     data = await _load_pdf(file)
-    result = _run(data, roles_param, enrich, model)
+    result = _run(data, roles_param, enrich, model, runtime, api_key)
     return JSONResponse(result.to_dict())
 
 
@@ -142,6 +168,8 @@ async def evaluate_stream(
     roles_param: str = Form("all", alias="roles"),
     enrich: bool = Form(True),
     model: Optional[str] = Form(None),
+    runtime: str = Form("local"),
+    api_key: Optional[str] = Form(None),
 ) -> StreamingResponse:
     data = await _load_pdf(file)
     try:
@@ -158,10 +186,19 @@ async def evaluate_stream(
 
     def worker() -> None:
         try:
-            evaluate(data, role_names, enrich=enrich, model=model, on_event=on_event)
+            evaluate(
+                data,
+                role_names,
+                enrich=enrich,
+                model=model,
+                on_event=on_event,
+                runtime=runtime,
+                api_key=api_key,
+            )
         except Exception as e:  # noqa: BLE001
-            logger.exception("Streaming evaluation failed")
-            on_event({"type": "error", "detail": str(e)})
+            safe = redact_secret(str(e), api_key)
+            logger.error("Streaming evaluation failed: %s", safe, exc_info=True)
+            on_event({"type": "error", "detail": safe})
         finally:
             loop.call_soon_threadsafe(queue.put_nowait, sentinel)
 
@@ -190,7 +227,9 @@ async def evaluate_html(
     roles_param: str = Form("all", alias="roles"),
     enrich: bool = Form(True),
     model: Optional[str] = Form(None),
+    runtime: str = Form("local"),
+    api_key: Optional[str] = Form(None),
 ) -> HTMLResponse:
     data = await _load_pdf(file)
-    result = _run(data, roles_param, enrich, model)
+    result = _run(data, roles_param, enrich, model, runtime, api_key)
     return HTMLResponse(report.render_html(result))

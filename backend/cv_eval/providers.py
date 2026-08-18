@@ -34,7 +34,14 @@ from cv_eval._bootstrap import ensure_core_on_path
 ensure_core_on_path()
 
 from models import OpenAICompatibleProvider  # noqa: E402  (core, path-injected)
-from config import provider_for  # noqa: E402
+
+from cv_eval.runtimes import (  # noqa: E402
+    CLOUD_RUNTIMES,
+    cloud_config,
+    parse_runtime,
+    redact_secret,
+    runtime_catalog,
+)
 
 
 OLLAMA_API = os.getenv("OLLAMA_HOST", "http://localhost:11434")
@@ -63,24 +70,13 @@ def list_local_models() -> List[str]:
         return []
 
 
-def _providers_json_models() -> List[str]:
-    """Every model declared in the vendored providers.json."""
-    from config import _config  # core module
-
-    models: List[str] = []
-    for prov in _config.get("providers", {}).values():
-        models.extend(prov.get("models", {}).keys())
-    return models
-
-
 def available_models() -> List[str]:
-    """All models we can target: providers.json + locally available Ollama models."""
-    seen: Dict[str, None] = {}
-    for m in _providers_json_models():
-        seen.setdefault(m, None)
-    for m in list_local_models():
-        seen.setdefault(m, None)
-    return list(seen.keys())
+    """Tags actually pulled on the local Ollama host.
+
+    Cloud catalogs live under ``GET /models`` → ``runtimes`` and are not mixed
+    in here, so the UI cannot present Gemini as a local model.
+    """
+    return list_local_models()
 
 
 def default_model() -> str:
@@ -113,45 +109,77 @@ def _is_local_ollama_model(model: str) -> bool:
     return model in list_local_models()
 
 
-def get_provider(model: Optional[str] = None, structured_output: Optional[str] = None) -> ResilientProvider:
-    """Build a resilient provider for ``model``.
+def models_payload() -> dict:
+    """Shape returned by ``GET /models``: pulled local tags plus cloud catalogs."""
+    local = list_local_models()
+    default = default_model()
+    if local and default not in local:
+        default = next((name for name in PREFERRED_MODELS if name in local), local[0])
+    return {
+        "default": default,
+        "available": local,
+        "runtimes": {
+            "local": {
+                "label": "Local Ollama",
+                "default": default,
+                "models": local,
+                "requires_key": False,
+                "key_help": None,
+            },
+            **runtime_catalog(),
+        },
+    }
 
-    Resolution:
-      * If the model is in providers.json, use its declared config.
-      * Else if it is a local Ollama model, build an Ollama config for it
-        (OpenAI-compat endpoint, no key, ``json_object`` structured output —
-        the mode Ollama reliably supports).
+
+def get_provider(
+    model: Optional[str] = None,
+    structured_output: Optional[str] = None,
+    runtime: str = "local",
+    api_key: Optional[str] = None,
+) -> ResilientProvider:
+    """Build a resilient provider for ``model`` on ``runtime``.
+
+    Local uses localhost Ollama only. The request key is ignored.
+
+    Cloud uses a hardcoded base URL plus the request-scoped ``api_key``.
+    Env is not read here — the CLI may fill a key before calling this.
     """
+    resolved = parse_runtime(runtime)
+    if resolved != "local":
+        spec = CLOUD_RUNTIMES[resolved]
+        chosen = model or spec.default_model
+        cfg = cloud_config(resolved, chosen, api_key)
+        if structured_output is not None:
+            cfg = {**cfg, "structured_output": structured_output}
+        return ResilientProvider(
+            base_url=cfg["base_url"],
+            api_key=cfg["api_key"],
+            structured_output=cfg["structured_output"],
+            extra_body=cfg.get("extra_body", {}),
+            model=chosen,
+        )
+
     model = model or default_model()
-
-    cfg: Optional[Dict[str, Any]] = None
-    try:
-        cfg = provider_for(model)
-    except ValueError:
-        cfg = None
-
-    if cfg is None:
-        if not _is_local_ollama_model(model):
-            raise ValueError(
-                f"Model '{model}' is not in providers.json and is not available "
-                f"on the local Ollama host ({OLLAMA_API}). "
-                f"Available: {', '.join(available_models()) or '(none)'}"
-            )
-        # Synthetic config for a locally-pulled Ollama model.
-        cfg = {
-            "base_url": OLLAMA_API + "/v1",
-            "api_key": None,
-            "structured_output": "json_object",
-            "extra_body": {"num_ctx": 32768},
-        }
-
+    if not _is_local_ollama_model(model):
+        raise ValueError(
+            f"Model '{model}' is not available on the local Ollama host "
+            f"({OLLAMA_API}). Pull it with `ollama pull {model}` or switch "
+            f"to a cloud runtime. Local models: "
+            f"{', '.join(list_local_models()) or '(none)'}"
+        )
+    cfg: Dict[str, Any] = {
+        "base_url": OLLAMA_API.rstrip("/") + "/v1",
+        "api_key": None,
+        "structured_output": "json_object",
+        "extra_body": {"num_ctx": 32768},
+    }
     if structured_output is not None:
         cfg = {**cfg, "structured_output": structured_output}
 
     return ResilientProvider(
         base_url=cfg["base_url"],
-        api_key=cfg.get("api_key"),
-        structured_output=cfg.get("structured_output", "json_schema"),
+        api_key=None,
+        structured_output=cfg["structured_output"],
         extra_body=cfg.get("extra_body", {}),
         model=model,
     )
@@ -175,7 +203,9 @@ class ResilientProvider:
         model: str = "",
     ):
         self.model = model
+        self.base_url = base_url
         self.structured_output = structured_output
+        self._api_key = api_key
         self._primary = OpenAICompatibleProvider(
             base_url=base_url,
             api_key=api_key,
@@ -203,7 +233,8 @@ class ResilientProvider:
             # Only fall back when structured output was actually requested.
             if "format" in primary_kwargs or self.structured_output != "none":
                 logging.getLogger(__name__).warning(
-                    "Structured-output request failed (%s); retrying without it.", exc
+                    "Structured-output request failed (%s); retrying without it.",
+                    redact_secret(str(exc), self._api_key),
                 )
                 return self._fallback.chat(model=model, messages=messages, options=options, **primary_kwargs)
             raise

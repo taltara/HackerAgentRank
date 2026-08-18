@@ -30,6 +30,7 @@ from github import fetch_and_display_github_info  # noqa: E402
 from cv_eval.providers import ResilientProvider, default_model, get_provider
 from cv_eval.result import CategoryResult, EvaluationResult, RoleEvaluation
 from cv_eval.roles import Role, load_role
+from cv_eval.runtimes import CLOUD_RUNTIMES, parse_runtime
 from cv_eval.scoring import coerce_evaluation_payload
 
 logger = logging.getLogger(__name__)
@@ -280,13 +281,19 @@ def evaluate(
     enrich: bool = True,
     model: Optional[str] = None,
     on_event: EventSink = None,
+    runtime: str = "local",
+    api_key: Optional[str] = None,
 ) -> EvaluationResult:
     """Evaluate a CV PDF against one or more rubrics."""
     if not role_names:
         raise ValueError("At least one role is required.")
 
-    model = model or default_model()
-    provider = get_provider(model)
+    runtime_id = parse_runtime(runtime)
+    if runtime_id != "local":
+        model = model or CLOUD_RUNTIMES[runtime_id].default_model
+    else:
+        model = model or default_model()
+    provider = get_provider(model, runtime=runtime_id, api_key=api_key)
     model_params = MODEL_PARAMETERS.get(model, {"temperature": 0.1, "top_p": 0.9})
     roles = [load_role(name) for name in role_names]
 
@@ -300,7 +307,7 @@ def evaluate(
         stages.append(
             {"id": f"score.{role.name}", "label": f"Scoring {role.position_title}"}
         )
-    _emit(on_event, {"type": "plan", "stages": stages, "model": model})
+    _emit(on_event, {"type": "plan", "stages": stages, "model": model, "runtime": runtime_id})
 
     resume = extract_resume(cv_bytes, provider, on_event=on_event)
     if resume is None:
@@ -371,6 +378,7 @@ def evaluate(
         resume=resume.model_dump() if hasattr(resume, "model_dump") else dict(resume),
         github=github_data or None,
         evaluations=evaluations,
+        runtime=runtime_id,
     )
     _emit(on_event, {"type": "complete", "result": result.to_dict()})
     return result

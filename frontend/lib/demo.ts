@@ -112,6 +112,7 @@ export const DEMO_ROLES: RoleSummary[] = [
 export const DEMO_RESULT: EvaluationResult = {
   candidate_name: "Alex Rivera",
   model: "gemma4:31b-mlx",
+  runtime: "local",
   github_enriched: true,
   resume: null,
   github: null,

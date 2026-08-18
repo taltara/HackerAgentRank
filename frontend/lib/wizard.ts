@@ -14,7 +14,7 @@ export const STEP_COPY: Record<
 > = {
   upload: { index: "01", title: "Upload", hint: "PDF resume" },
   rubric: { index: "02", title: "Rubric", hint: "Role to score against" },
-  configure: { index: "03", title: "Model", hint: "Runtime options" },
+  configure: { index: "03", title: "Model", hint: "Local or cloud" },
   run: { index: "04", title: "Evaluate", hint: "Extract and score" },
   results: { index: "05", title: "Results", hint: "Scores and evidence" },
 };

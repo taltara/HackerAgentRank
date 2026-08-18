@@ -1,8 +1,9 @@
 "use client";
 
-import type { EvaluationResult } from "../../lib/types";
+import type { EvaluationResult, RuntimeName } from "../../lib/types";
 import { humanizeModel } from "../../lib/format";
-import Chip from "../Chip";
+import { parseRuntime, runtimeLabel } from "../../lib/runtimes";
+import Chip, { type ChipTone } from "../Chip";
 import ResultCard from "../ResultCard";
 
 interface ResultsStepProps {
@@ -10,8 +11,23 @@ interface ResultsStepProps {
   onDownload: () => void;
 }
 
+function runtimeTone(runtime: RuntimeName): ChipTone {
+  switch (runtime) {
+    case "local":
+      return "neutral";
+    case "ollama_cloud":
+    case "gemini":
+      return "warning";
+    default: {
+      const _never: never = runtime;
+      return _never;
+    }
+  }
+}
+
 export default function ResultsStep({ result, onDownload }: ResultsStepProps) {
   const sorted = [...result.evaluations].sort((a, b) => b.overall - a.overall);
+  const runtime = parseRuntime(result.runtime);
 
   return (
     <div className="space-y-8">
@@ -27,6 +43,7 @@ export default function ResultsStep({ result, onDownload }: ResultsStepProps) {
             <Chip tone="model" icon="◆">
               {humanizeModel(result.model)}
             </Chip>
+            <Chip tone={runtimeTone(runtime)}>{runtimeLabel(runtime)}</Chip>
             <Chip tone={result.github_enriched ? "positive" : "neutral"}>
               {result.github_enriched ? "GitHub enriched" : "GitHub off"}
             </Chip>

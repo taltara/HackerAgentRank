@@ -33,8 +33,12 @@ function StepBody(props: ReturnType<typeof useEvaluator>) {
       return (
         <ConfigureStep
           models={props.models}
+          runtime={props.runtime}
+          onRuntime={props.setRuntime}
           model={props.model}
           onModel={props.setModel}
+          apiKey={props.apiKey}
+          onApiKey={props.setApiKey}
           enrich={props.enrich}
           onEnrich={props.setEnrich}
         />

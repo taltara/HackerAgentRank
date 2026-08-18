@@ -44,6 +44,7 @@ class EvaluationResult:
     resume: dict
     github: Optional[dict]
     evaluations: List[RoleEvaluation]
+    runtime: str = "local"
 
     @property
     def primary(self) -> Optional[RoleEvaluation]:

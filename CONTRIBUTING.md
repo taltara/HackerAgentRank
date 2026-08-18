@@ -8,7 +8,7 @@ Thanks for considering a patch. This repo is a thin product layer around a vendo
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python -m unittest tests.test_smoke -v
+python -m unittest tests.test_smoke tests.test_runtimes -v
 
 cd ../frontend
 npm install
@@ -16,7 +16,7 @@ npm run typecheck
 npm run lint
 ```
 
-Run Ollama if you are exercising extraction or scoring. Smoke tests do not call an LLM.
+Run Ollama for local extraction/scoring, or paste a Gemini / Ollama Cloud key on wizard step 03. Smoke tests do not call an LLM.
 
 ## What belongs where
 

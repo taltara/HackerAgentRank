@@ -19,7 +19,7 @@
 | Concern            | Reference                    | This app                                        |
 | ------------------ | --------------------------- | ---------------------------------------------- |
 | Rubric selection   | single role, hardcoded       | multi-rubric, `--compare`, API `roles` param   |
-| Model layer        | one provider, strict JSON    | resilient fallback + Ollama auto-detect        |
+| Model layer        | one provider, strict JSON    | resilient fallback, local Ollama auto-detect, optional Gemini / Ollama Cloud BYOK |
 | Surface            | CLI only                     | CLI + FastAPI + Next.js UI                     |
 | Output             | printed report / CSV         | JSON + HTML report, API responses             |
 | Rubrics            | `software_engineering_intern`| intern (HackerRank) plus community roles grouped by department |
@@ -30,6 +30,7 @@
 cv_eval/
 ├── _bootstrap.py    # puts core/ on sys.path (core uses flat imports)
 ├── providers.py     # model resolution, Ollama auto-detect, ResilientProvider
+├── runtimes.py      # local | ollama_cloud | gemini catalogs (fixed cloud URLs)
 ├── roles.py         # load/validate rubrics from cv_eval/rubrics/ (or CV_EVAL_ROLES_DIR)
 ├── pipeline.py      # evaluate(): extract → enrich → score → EvaluationResult
 ├── report.py        # render EvaluationResult → text / HTML
@@ -42,13 +43,13 @@ cv_eval/
 
 ```
 cv_bytes ─▶ pipeline.evaluate()
-             │  1. providers.get_provider(model)  → ResilientProvider
+             │  1. providers.get_provider(model, runtime, api_key)  → ResilientProvider
              │  2. pdf.PDFHandler(provider).extract_json_from_pdf()  → JSONResume
              │  3. github.fetch_and_display_github_info()  → {profile, projects}  (optional)
              │  4. transform.convert_json_resume_to_text() [+ github text]
              │  5. for each role: build_evaluation_model() + LLM → EvaluationData
              ▼
-          EvaluationResult { candidate_name, model, github_enriched,
+          EvaluationResult { candidate_name, model, runtime, github_enriched,
                              resume, github, evaluations[] }
 ```
 

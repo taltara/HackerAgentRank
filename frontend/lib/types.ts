@@ -1,3 +1,7 @@
+import type { RuntimeCatalog, RuntimeName } from "./runtimes";
+
+export type { RuntimeCatalog, RuntimeName } from "./runtimes";
+
 export interface CategoryResult {
   key: string;
   label: string;
@@ -30,6 +34,7 @@ export interface EvaluationResult {
   resume: Record<string, unknown> | null;
   github: Record<string, unknown> | null;
   evaluations: RoleEvaluation[];
+  runtime?: RuntimeName | string;
 }
 
 export interface RoleSummary {
@@ -46,6 +51,7 @@ export interface RoleSummary {
 export interface ModelsInfo {
   default: string;
   available: string[];
+  runtimes?: Record<string, RuntimeCatalog>;
 }
 
 export type StageStatus = "pending" | "running" | "done" | "skipped" | "error";
@@ -56,7 +62,7 @@ export interface PlannedStage {
 }
 
 export type PipelineEvent =
-  | { type: "plan"; stages: PlannedStage[]; model: string }
+  | { type: "plan"; stages: PlannedStage[]; model: string; runtime?: string }
   | { type: "stage"; id: string; label: string; status: StageStatus; detail?: string | null }
   | { type: "partial"; evaluation: RoleEvaluation }
   | { type: "complete"; result: EvaluationResult }

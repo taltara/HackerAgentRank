@@ -4,9 +4,10 @@ Local-first CV scoring against explainable hiring rubrics.
 
 `cv-eval` reads a PDF resume, extracts a structured profile, optionally enriches
 it with public GitHub signals, and scores it against one or more rubrics using a
-local LLM through [Ollama](https://ollama.com). Every category score comes back
-with the evidence that produced it. Nothing leaves your machine unless you
-enable GitHub enrichment.
+local LLM through [Ollama](https://ollama.com) or a per-run Gemini / Ollama Cloud
+key. Every category score comes back with the evidence that produced it. Local
+runtime keeps the CV on this machine; cloud runtime sends it to that provider
+for the evaluation.
 
 ## Install
 
@@ -17,11 +18,14 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
 
-You also need Ollama running with at least one model pulled:
+You also need an LLM. Local default:
 
 ```bash
 ollama pull gemma4:latest
 ```
+
+Or pass `--runtime gemini` / `--runtime ollama_cloud` with `GEMINI_API_KEY` or
+`OLLAMA_API_KEY` set (or `--api-key` for a single invocation).
 
 ## Use
 

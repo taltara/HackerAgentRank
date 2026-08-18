@@ -21,7 +21,7 @@ ${bold("Options")}
   -h, --help        Show this message
 
 ${bold("Requirements")}
-  Python 3.11+, Node.js 20+, and Ollama with at least one model pulled.
+  Python 3.11+, Node.js 20+. Ollama is optional if you paste a Gemini or Ollama Cloud key on step 03.
 
 ${dim("Anything other than the commands above is passed through to the Python CLI.")}
 `;

@@ -1,5 +1,5 @@
 import { exists, run } from "./exec.js";
-import { detail, fail, ok, step } from "./log.js";
+import { detail, fail, ok, step, warn } from "./log.js";
 
 const OLLAMA_URL = process.env.OLLAMA_HOST || "http://127.0.0.1:11434";
 
@@ -34,11 +34,16 @@ async function listModels() {
 /**
  * Verify the host can run the stack. Returns the resolved Python command.
  * Throws with actionable guidance rather than letting a later step fail oddly.
+ *
+ * `ollama`:
+ *   - required — hard fail if Ollama is down or has no models (CLI default)
+ *   - optional — warn and continue so the UI can take a Gemini / Ollama Cloud key
+ *   - skip — do not check (web-only, or CLI with --runtime gemini|ollama_cloud)
  */
 export async function preflight({
   needsNode,
   needsPython = true,
-  needsOllama = true,
+  ollama = "required",
 }) {
   step("Checking your environment");
 
@@ -68,19 +73,27 @@ export async function preflight({
     }
   }
 
-  if (needsOllama) {
+  if (ollama !== "skip") {
     const models = await listModels();
-    if (models === null) {
-      fail(`No Ollama server responded at ${OLLAMA_URL}.`);
-      detail("Install from https://ollama.com, then run: ollama serve");
-      throw new Error("ollama unreachable");
+    if (models === null || models.length === 0) {
+      const missing =
+        models === null
+          ? `No Ollama server responded at ${OLLAMA_URL}.`
+          : "Ollama is running but has no models installed.";
+      if (ollama === "required") {
+        fail(missing);
+        detail(
+          models === null
+            ? "Install from https://ollama.com, then run: ollama serve"
+            : "Pull one, for example: ollama pull gemma4:latest",
+        );
+        throw new Error(models === null ? "ollama unreachable" : "no models");
+      }
+      warn(missing);
+      detail("Paste a Gemini or Ollama Cloud key on step 03, or install Ollama.");
+    } else {
+      ok(`Ollama with ${models.length} model${models.length === 1 ? "" : "s"}`);
     }
-    if (models.length === 0) {
-      fail("Ollama is running but has no models installed.");
-      detail("Pull one, for example: ollama pull gemma4:latest");
-      throw new Error("no models");
-    }
-    ok(`Ollama with ${models.length} model${models.length === 1 ? "" : "s"}`);
   }
 
   return pythonCommand;

@@ -20,8 +20,9 @@ import typer
 
 from cv_eval import report
 from cv_eval.pipeline import evaluate as run_evaluation
-from cv_eval.providers import available_models, default_model, list_local_models
+from cv_eval.providers import default_model, list_local_models
 from cv_eval.roles import list_roles, load_role, role_summary
+from cv_eval.runtimes import CLOUD_RUNTIMES, cli_api_key, parse_runtime, redact_secret
 
 app = typer.Typer(
     add_completion=False,
@@ -49,15 +50,16 @@ def roles() -> None:
 
 @app.command()
 def models() -> None:
-    """List models we can target (providers.json + local Ollama)."""
+    """List local Ollama models and cloud catalogs."""
     local = list_local_models()
     default = default_model()
-    typer.echo(f"Default: {default}")
+    typer.echo(f"Default (local): {default}")
     typer.echo(f"\nLocal (Ollama): {', '.join(local) or '(none reachable)'}")
-    typer.echo("\nAll available:")
-    for m in available_models():
-        marker = "  <- default" if m == default else ""
-        typer.echo(f"  {m}{marker}")
+    typer.echo("\nCloud (key required for that run):")
+    for name, spec in CLOUD_RUNTIMES.items():
+        typer.echo(f"  --runtime {name}  default={spec.default_model}")
+        typer.echo(f"      models: {', '.join(spec.models)}")
+        typer.echo(f"      key: {spec.key_help}")
 
 
 @app.command("evaluate")
@@ -84,6 +86,19 @@ def evaluate_cmd(
     json_out: Optional[str] = typer.Option(
         None, "--json-out", help="Write the raw JSON result here."
     ),
+    runtime: str = typer.Option(
+        "local",
+        "--runtime",
+        help="LLM runtime: local, ollama_cloud, or gemini.",
+    ),
+    api_key: Optional[str] = typer.Option(
+        None,
+        "--api-key",
+        help=(
+            "Per-run cloud key. Prefer GEMINI_API_KEY / OLLAMA_API_KEY so the "
+            "key is not stored in shell history."
+        ),
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose logging."),
 ) -> None:
     """Evaluate a CV PDF against one or more rubrics."""
@@ -104,19 +119,39 @@ def evaluate_cmd(
             typer.echo(str(e), err=True)
             raise typer.Exit(1)
 
+    if api_key:
+        typer.echo(
+            "Warning: --api-key may be stored in your shell history. "
+            "Prefer GEMINI_API_KEY or OLLAMA_API_KEY.",
+            err=True,
+        )
+
+    display_model = model
+    runtime_id = parse_runtime(runtime)
+    resolved_key = cli_api_key(runtime_id, api_key) if runtime_id != "local" else None
+    if not display_model and runtime_id != "local":
+        display_model = CLOUD_RUNTIMES[runtime_id].default_model
     typer.echo(
         f"Evaluating {cv_path} against {', '.join(role_names)} with "
-        f"{model or default_model()}…",
+        f"{runtime_id}/{display_model or default_model()}…",
         err=True,
     )
 
     try:
         with open(cv_path, "rb") as f:
             result = run_evaluation(
-                f.read(), role_names, enrich=not no_github, model=model
+                f.read(),
+                role_names,
+                enrich=not no_github,
+                model=model,
+                runtime=runtime_id,
+                api_key=resolved_key,
             )
     except Exception as e:  # noqa: BLE001
-        typer.echo(f"Evaluation failed: {e}", err=True)
+        typer.echo(
+            f"Evaluation failed: {redact_secret(str(e), resolved_key or api_key)}",
+            err=True,
+        )
         raise typer.Exit(1)
 
     typer.echo("")

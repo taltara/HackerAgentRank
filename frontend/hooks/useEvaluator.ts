@@ -9,8 +9,14 @@ import type {
   PlannedStage,
   RoleEvaluation,
   RoleSummary,
+  RuntimeName,
   StageStatus,
 } from "../lib/types";
+import {
+  defaultForRuntime,
+  isCloudRuntime,
+  modelsForRuntime,
+} from "../lib/runtimes";
 import { nextStep, prevStep, type WizardStep } from "../lib/wizard";
 
 export type RunStatus = "" | "running" | "done" | "error";
@@ -49,6 +55,8 @@ export function useEvaluator() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [model, setModel] = useState("");
+  const [runtime, setRuntimeState] = useState<RuntimeName>("local");
+  const [apiKey, setApiKey] = useState("");
   const [enrich, setEnrich] = useState(false);
   const [step, setStep] = useState<WizardStep>("upload");
   const [status, setStatus] = useState<RunStatus>("");
@@ -74,7 +82,11 @@ export function useEvaluator() {
           setBackendOk(true);
           if (m) {
             setModels(m);
-            setModel(m.default);
+            setModel((current) =>
+              current ||
+              defaultForRuntime(m.runtimes, "local", m.available) ||
+              m.default,
+            );
           }
           return;
         } catch {
@@ -95,8 +107,15 @@ export function useEvaluator() {
         return !!file;
       case "rubric":
         return selectedRoles.length > 0;
-      case "configure":
-        return !!model;
+      case "configure": {
+        const allowed = modelsForRuntime(
+          models?.runtimes,
+          runtime,
+          models?.available,
+        );
+        if (runtime === "local") return allowed.includes(model);
+        return allowed.includes(model) && apiKey.trim().length > 0;
+      }
       case "run":
         return status === "done";
       case "results":
@@ -106,7 +125,23 @@ export function useEvaluator() {
         return _never;
       }
     }
-  }, [step, file, selectedRoles.length, model, status]);
+  }, [step, file, selectedRoles.length, model, runtime, apiKey, status, models]);
+
+  const setRuntime = useCallback(
+    (next: RuntimeName) => {
+      setRuntimeState(next);
+      setModel((current) => {
+        const allowed = modelsForRuntime(
+          models?.runtimes,
+          next,
+          models?.available,
+        );
+        if (allowed.includes(current)) return current;
+        return defaultForRuntime(models?.runtimes, next, models?.available);
+      });
+    },
+    [models],
+  );
 
   const goNext = useCallback(() => {
     const nxt = nextStep(step);
@@ -134,7 +169,14 @@ export function useEvaluator() {
     setStep("run");
     try {
       const final = await evaluateStream(
-        { file, roles: selectedRoles, enrich, model: model || undefined },
+        {
+          file,
+          roles: selectedRoles,
+          enrich,
+          model: model || undefined,
+          runtime,
+          apiKey: isCloudRuntime(runtime) ? apiKey : undefined,
+        },
         (event: PipelineEvent) => {
           setStages((current) => applyEvent(current, event));
           if (event.type === "partial") {
@@ -155,7 +197,7 @@ export function useEvaluator() {
       setError(e instanceof Error ? e.message : String(e));
       setStatus("error");
     }
-  }, [file, selectedRoles, enrich, model]);
+  }, [file, selectedRoles, enrich, model, runtime, apiKey]);
 
   const downloadJson = useCallback(() => {
     if (!result) return;
@@ -180,6 +222,10 @@ export function useEvaluator() {
     setSelectedRoles,
     model,
     setModel,
+    runtime,
+    setRuntime,
+    apiKey,
+    setApiKey,
     enrich,
     setEnrich,
     step,

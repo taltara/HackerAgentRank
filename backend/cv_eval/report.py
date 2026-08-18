@@ -11,6 +11,7 @@ import html
 from typing import List, Optional
 
 from cv_eval.result import EvaluationResult, RoleEvaluation
+from cv_eval.runtimes import runtime_label
 
 
 def _bar(value: float, max_value: float, width: int = 30) -> str:
@@ -44,7 +45,8 @@ def render_role_text(ev: RoleEvaluation) -> str:
 def render_text(result: EvaluationResult) -> str:
     header = [
         f"CV EVALUATION — {result.candidate_name or '(candidate)'}",
-        f"Model: {result.model}   |   GitHub enriched: {'yes' if result.github_enriched else 'no'}",
+        f"Model: {result.model}   |   Runtime: {runtime_label(result.runtime)}   |   "
+        f"GitHub enriched: {'yes' if result.github_enriched else 'no'}",
         f"Rubrics: {', '.join(ev.role for ev in result.evaluations)}",
         "=" * 60,
     ]
@@ -139,7 +141,8 @@ def render_html(result: EvaluationResult, title: Optional[str] = None) -> str:
 </style></head>
 <body><div class="wrap">
   <h1>{name}</h1>
-  <div class="meta">Model {html.escape(result.model)} · GitHub enriched:
+  <div class="meta">Model {html.escape(result.model)} · Runtime
+    {html.escape(runtime_label(result.runtime))} · GitHub enriched:
     {'yes' if result.github_enriched else 'no'} ·
     Rubrics: {', '.join(html.escape(e.role) for e in result.evaluations)}</div>
   {''.join(blocks)}

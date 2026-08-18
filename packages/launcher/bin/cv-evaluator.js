@@ -7,12 +7,15 @@ ${bold("cv-evaluator")} — local-first CV scoring against explainable hiring ru
 
 ${bold("Usage")}
   npx cv-evaluator                 Start the API and web UI, then open a browser
-  npx cv-evaluator evaluate <cv.pdf>  Score a CV from the terminal
+  npx cv-evaluator evaluate <pdf>  Score a CV from the terminal
   npx cv-evaluator roles           List the available rubrics
 
 ${bold("Options")}
   --api-port <n>    Port for the API        ${dim("(default: 8000)")}
   --web-port <n>    Port for the web UI     ${dim("(default: 3000)")}
+  --dev             Reload on change (uvicorn --reload + next dev)
+  --api-only        Start only the FastAPI backend
+  --web-only        Start only the Next.js UI
   --no-open         Do not open a browser
   --refresh         Re-download the latest version before starting
   -h, --help        Show this message
@@ -24,7 +27,15 @@ ${dim("Anything other than the commands above is passed through to the Python CL
 `;
 
 function parse(argv) {
-  const options = { apiPort: 8000, webPort: 3000, open: true, refresh: false };
+  const options = {
+    apiPort: 8000,
+    webPort: 3000,
+    open: true,
+    refresh: false,
+    dev: false,
+    apiOnly: false,
+    webOnly: false,
+  };
   const rest = [];
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -42,6 +53,15 @@ function parse(argv) {
       case "--refresh":
         options.refresh = true;
         break;
+      case "--dev":
+        options.dev = true;
+        break;
+      case "--api-only":
+        options.apiOnly = true;
+        break;
+      case "--web-only":
+        options.webOnly = true;
+        break;
       case "-h":
       case "--help":
         options.help = true;
@@ -53,6 +73,9 @@ function parse(argv) {
 
   if (!Number.isInteger(options.apiPort) || !Number.isInteger(options.webPort)) {
     throw new Error("Ports must be integers.");
+  }
+  if (options.apiOnly && options.webOnly) {
+    throw new Error("Use --api-only or --web-only, not both.");
   }
   return { options, rest };
 }

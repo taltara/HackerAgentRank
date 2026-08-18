@@ -52,42 +52,68 @@ function superviseUntilExit(children) {
   }
 }
 
-/** Bring up the API and web UI, then open a browser. */
-export async function up({ apiPort, webPort, open, refresh }) {
+/** Bring up the API and/or web UI, then open a browser. */
+export async function up({
+  apiPort,
+  webPort,
+  open,
+  refresh,
+  dev = false,
+  apiOnly = false,
+  webOnly = false,
+}) {
   banner();
-  const python = await preflight({ needsNode: true });
+  const python = await preflight({
+    needsNode: !apiOnly,
+    needsPython: !webOnly,
+    needsOllama: !webOnly,
+  });
   const appDir = await resolveApp({ cacheDir: CACHE_DIR, refresh });
-
-  const { backend, interpreter } = await prepareBackend({ appDir, python });
   const apiUrl = `http://127.0.0.1:${apiPort}`;
-  const frontend = await prepareFrontend({ appDir, apiUrl });
+  const children = [];
 
-  step("Starting services");
-  const api = startBackend({ backend, interpreter, port: apiPort });
-  if (!(await waitForBackend(apiPort))) {
-    api.kill("SIGTERM");
-    fail(`The API did not come up on port ${apiPort}.`);
-    detail("Is something else already using that port? Try --api-port 8010.");
-    process.exitCode = 1;
-    return;
+  if (!webOnly) {
+    const { backend, interpreter } = await prepareBackend({ appDir, python });
+    step(dev ? "Starting API with reload" : "Starting API");
+    const api = startBackend({
+      backend,
+      interpreter,
+      port: apiPort,
+      reload: dev,
+    });
+    children.push(api);
+    if (!(await waitForBackend(apiPort))) {
+      api.kill("SIGTERM");
+      fail(`The API did not come up on port ${apiPort}.`);
+      detail("Is something else already using that port? Try --api-port 8010.");
+      process.exitCode = 1;
+      return;
+    }
+    ok(`API on ${apiUrl}`);
   }
-  ok(`API on ${apiUrl}`);
 
-  const web = startFrontend({ frontend, port: webPort, apiUrl });
-  const webUrl = `http://127.0.0.1:${webPort}`;
-  if (!(await waitForFrontend(webPort))) {
-    warn(`The web UI is slow to start; it may still appear at ${webUrl}.`);
-  } else {
-    ok(`Web UI on ${webUrl}`);
+  let webUrl = null;
+  if (!apiOnly) {
+    const frontend = await prepareFrontend({ appDir, apiUrl, dev });
+    step(dev ? "Starting web UI (next dev)" : "Starting web UI");
+    const web = startFrontend({ frontend, port: webPort, apiUrl, dev });
+    children.push(web);
+    webUrl = `http://127.0.0.1:${webPort}`;
+    if (!(await waitForFrontend(webPort))) {
+      warn(`The web UI is slow to start; it may still appear at ${webUrl}.`);
+    } else {
+      ok(`Web UI on ${webUrl}`);
+    }
   }
 
   console.log("");
-  console.log(`  ${bold("Open")} ${gold(webUrl)}`);
+  if (webUrl) console.log(`  ${bold("Open")} ${gold(webUrl)}`);
+  else console.log(`  ${bold("API")} ${gold(apiUrl)}`);
   console.log("  Press Ctrl+C to stop.");
   console.log("");
 
-  if (open) openBrowser(webUrl);
-  superviseUntilExit([api, web]);
+  if (open && webUrl) openBrowser(webUrl);
+  superviseUntilExit(children);
 }
 
 /** Run the Python CLI with the given arguments, provisioning it if needed. */

@@ -35,16 +35,24 @@ async function listModels() {
  * Verify the host can run the stack. Returns the resolved Python command.
  * Throws with actionable guidance rather than letting a later step fail oddly.
  */
-export async function preflight({ needsNode }) {
+export async function preflight({
+  needsNode,
+  needsPython = true,
+  needsOllama = true,
+}) {
   step("Checking your environment");
 
-  const python = await findPython();
-  if (!python) {
-    fail("Python 3.11+ is required and was not found on PATH.");
-    detail("Install it from https://www.python.org/downloads/ and retry.");
-    throw new Error("missing python");
+  let pythonCommand = null;
+  if (needsPython) {
+    const python = await findPython();
+    if (!python) {
+      fail("Python 3.11+ is required and was not found on PATH.");
+      detail("Install it from https://www.python.org/downloads/ and retry.");
+      throw new Error("missing python");
+    }
+    ok(`${python.version}`);
+    pythonCommand = python.command;
   }
-  ok(`${python.version}`);
 
   if (needsNode) {
     const major = Number(process.versions.node.split(".")[0]);
@@ -60,18 +68,20 @@ export async function preflight({ needsNode }) {
     }
   }
 
-  const models = await listModels();
-  if (models === null) {
-    fail(`No Ollama server responded at ${OLLAMA_URL}.`);
-    detail("Install from https://ollama.com, then run: ollama serve");
-    throw new Error("ollama unreachable");
+  if (needsOllama) {
+    const models = await listModels();
+    if (models === null) {
+      fail(`No Ollama server responded at ${OLLAMA_URL}.`);
+      detail("Install from https://ollama.com, then run: ollama serve");
+      throw new Error("ollama unreachable");
+    }
+    if (models.length === 0) {
+      fail("Ollama is running but has no models installed.");
+      detail("Pull one, for example: ollama pull gemma3:12b");
+      throw new Error("no models");
+    }
+    ok(`Ollama with ${models.length} model${models.length === 1 ? "" : "s"}`);
   }
-  if (models.length === 0) {
-    fail("Ollama is running but has no models installed.");
-    detail("Pull one, for example: ollama pull gemma3:12b");
-    throw new Error("no models");
-  }
-  ok(`Ollama with ${models.length} model${models.length === 1 ? "" : "s"}`);
 
-  return python.command;
+  return pythonCommand;
 }

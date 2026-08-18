@@ -18,7 +18,7 @@ async function builtAgainst(frontend) {
   }
 }
 
-export async function prepareFrontend({ appDir, apiUrl }) {
+export async function prepareFrontend({ appDir, apiUrl, dev = false }) {
   const frontend = join(appDir, "frontend");
 
   if (!existsSync(join(frontend, "node_modules"))) {
@@ -28,6 +28,11 @@ export async function prepareFrontend({ appDir, apiUrl }) {
       cwd: frontend,
     });
     ok("Web UI dependencies ready");
+  }
+
+  if (dev) {
+    ok("Web UI ready (dev server)");
+    return frontend;
   }
 
   // NEXT_PUBLIC_* is inlined at build time, so a build made against a different
@@ -48,8 +53,11 @@ export async function prepareFrontend({ appDir, apiUrl }) {
   return frontend;
 }
 
-export function startFrontend({ frontend, port, apiUrl }) {
-  return start(npm, ["run", "start", "--", "--port", String(port)], {
+export function startFrontend({ frontend, port, apiUrl, dev = false }) {
+  const args = dev
+    ? ["run", "dev", "--", "--port", String(port)]
+    : ["run", "start", "--", "--port", String(port)];
+  return start(npm, args, {
     cwd: frontend,
     prefix: "web  ",
     env: { NEXT_TELEMETRY_DISABLED: "1", NEXT_PUBLIC_API_URL: apiUrl },

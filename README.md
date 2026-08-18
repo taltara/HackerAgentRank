@@ -27,53 +27,62 @@ HackerRank's hiring-agent is a strong intern scoring pipeline. It is also a sing
 
 ## Quick start
 
+Ollama must be running with a model pulled:
+
 ```bash
-ollama serve && ollama pull gemma3:12b
+ollama serve
+ollama pull gemma3:12b
+```
+
+### Anyone — one command
+
+```bash
 npx cv-evaluator
 ```
 
-That checks your environment, provisions both services, and opens the UI at `http://localhost:3000`. Ports are configurable with `--api-port` and `--web-port`.
+Provisions the API and the UI, then opens http://localhost:3000.
 
-From a clone, the same launcher is local (no registry needed):
+### From a clone
+
+Same one-command path, using the tree in front of you:
 
 ```bash
-npx .
+npm run dev          # API + UI, reload on change → http://localhost:3000
 ```
 
-Just want the CLI, no Node? From a clone:
+Or the two processes separately (this is the usual contributor loop):
 
 ```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python -m cv_eval evaluate cv.pdf --role backend_engineer
+npm run api          # FastAPI  → http://localhost:8000
+npm run web          # Next.js  → http://localhost:3000
 ```
 
-<details>
-<summary>Manual setup (contributors)</summary>
+`npm run api` creates `backend/.venv` and installs Python deps on first run. `npm run web` runs `npm install` in `frontend/` on first run.
+
+Raw commands, if you prefer not to use the launcher:
 
 ```bash
-# API / CLI
+# terminal 1 — API
 cd backend
-python -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
+uvicorn cv_eval.api:app --reload --port 8000
 
-python -m cv_eval roles
-python -m unittest tests.test_smoke -v
-python -m cv_eval evaluate /path/to/cv.pdf --role backend_engineer
-
-# Web UI — terminal 1
-cd backend && uvicorn cv_eval.api:app --reload --port 8000
-
-# Web UI — terminal 2
+# terminal 2 — UI
 cd frontend
 cp .env.example .env.local
 npm install
-npm run dev                  # http://localhost:3000
+npm run dev
 ```
 
-</details>
+CLI only (no browser):
+
+```bash
+cd backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python -m cv_eval evaluate cv.pdf --role backend_engineer
+```
 
 ### On packaging
 

@@ -45,12 +45,22 @@ export async function prepareBackend({ appDir, python }) {
   return { backend, interpreter };
 }
 
-export function startBackend({ backend, interpreter, port }) {
-  return start(
-    interpreter,
-    ["-m", "uvicorn", "cv_eval.api:app", "--port", String(port), "--host", "127.0.0.1"],
-    { cwd: backend, prefix: "api  ", env: { PYTHONUNBUFFERED: "1" } },
-  );
+export function startBackend({ backend, interpreter, port, reload = false }) {
+  const args = [
+    "-m",
+    "uvicorn",
+    "cv_eval.api:app",
+    "--port",
+    String(port),
+    "--host",
+    "127.0.0.1",
+  ];
+  if (reload) args.push("--reload");
+  return start(interpreter, args, {
+    cwd: backend,
+    prefix: "api  ",
+    env: { PYTHONUNBUFFERED: "1" },
+  });
 }
 
 /** Poll the health endpoint until the API answers or the timeout elapses. */

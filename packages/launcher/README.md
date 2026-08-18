@@ -13,9 +13,8 @@ starts both services, and opens a browser.
 ## What this package is
 
 A **launcher**, not the product. The evaluation pipeline is Python (PDF parsing,
-resume extraction, LLM scoring) and is distributed on PyPI as `cv-eval`. This
-package exists so that developers can get the whole stack running with one
-command instead of following a five-step setup.
+resume extraction, LLM scoring). This package exists so that developers can get
+the whole stack running with one command instead of following a five-step setup.
 
 It has **zero runtime dependencies** and never reimplements pipeline logic.
 
@@ -40,6 +39,9 @@ npx cv-evaluator evaluate cv.pdf --role backend_engineer
 | ---------------- | ------- | ------------------------------------------- |
 | `--api-port <n>` | `8000`  | Port for the FastAPI service                |
 | `--web-port <n>` | `3000`  | Port for the web UI                         |
+| `--dev`          | —       | `uvicorn --reload` and `next dev`           |
+| `--api-only`     | —       | Start only the FastAPI backend              |
+| `--web-only`     | —       | Start only the Next.js UI                   |
 | `--no-open`      | —       | Do not open a browser                       |
 | `--refresh`      | —       | Re-download the latest version before start |
 

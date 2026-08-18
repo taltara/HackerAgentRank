@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Score tooltip: same CV typically varies ±2–3 points between runs
+
 ## 0.1.3
 
 - Optional Gemini 3.5 Flash and Ollama Cloud (Gemma 4) runtimes on wizard step 03

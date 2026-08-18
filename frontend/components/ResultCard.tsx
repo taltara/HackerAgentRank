@@ -4,6 +4,7 @@ import type { RoleEvaluation } from "../lib/types";
 import { scoreBand } from "../lib/format";
 import { useCollapsibleCategories } from "../hooks/useCollapsibleCategories";
 import CategoryRow from "./CategoryRow";
+import ScoreVarianceHint from "./ScoreVarianceHint";
 
 interface ResultCardProps {
   ev: RoleEvaluation;
@@ -46,10 +47,15 @@ export default function ResultCard({ ev }: ResultCardProps) {
           </button>
         </div>
         <div className="text-right">
-          <p className={`font-display text-4xl tabular-nums ${tone(overallRatio)}`}>
-            {ev.overall}
-            <span className="text-base text-mist">/{ev.max_final_score}</span>
-          </p>
+          <div className="flex items-start justify-end gap-1.5">
+            <p className={`font-display text-4xl tabular-nums ${tone(overallRatio)}`}>
+              {ev.overall}
+              <span className="text-base text-mist">/{ev.max_final_score}</span>
+            </p>
+            <span className="mt-1.5">
+              <ScoreVarianceHint />
+            </span>
+          </div>
           <p className="mt-1 text-[11px] text-mist">
             base {ev.total_score}/{ev.total_max}
             {ev.bonus_points > 0 && ` · +${ev.bonus_points} bonus`}

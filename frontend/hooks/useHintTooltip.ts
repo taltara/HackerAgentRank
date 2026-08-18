@@ -2,7 +2,7 @@
 
 import { useCallback, useId, useState } from "react";
 
-export function useKeyPrivacyHint() {
+export function useHintTooltip() {
   const labelId = useId();
   const [open, setOpen] = useState(false);
   const show = useCallback(() => setOpen(true), []);

@@ -20,7 +20,7 @@ pip install -e .
 You also need Ollama running with at least one model pulled:
 
 ```bash
-ollama pull gemma3:12b
+ollama pull gemma4:latest
 ```
 
 ## Use

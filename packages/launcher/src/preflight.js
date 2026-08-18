@@ -77,7 +77,7 @@ export async function preflight({
     }
     if (models.length === 0) {
       fail("Ollama is running but has no models installed.");
-      detail("Pull one, for example: ollama pull gemma3:12b");
+      detail("Pull one, for example: ollama pull gemma4:latest");
       throw new Error("no models");
     }
     ok(`Ollama with ${models.length} model${models.length === 1 ? "" : "s"}`);

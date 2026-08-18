@@ -22,7 +22,7 @@ HackerRank's hiring-agent is a strong intern scoring pipeline. It is also a sing
 ## Requirements
 
 - **Python 3.11+**
-- **[Ollama](https://ollama.com)** with a pulled model — `gemma3:12b` is a good default
+- **[Ollama](https://ollama.com)** with a pulled model — `gemma4:latest` is the default
 - **Node.js 20+** (web UI only)
 
 ## Quick start
@@ -31,7 +31,7 @@ Ollama must be running with a model pulled:
 
 ```bash
 ollama serve
-ollama pull gemma3:12b
+ollama pull gemma4:latest
 ```
 
 ### Anyone — one command

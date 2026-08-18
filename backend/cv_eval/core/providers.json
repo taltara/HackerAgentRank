@@ -8,11 +8,10 @@
       "extra_body": { "num_ctx": 32768 },
       "models": {
         "qwen3:1.7b":  { "temperature": 0.0, "top_p": 0.9 },
-        "gemma3:1b":   { "temperature": 0.0, "top_p": 0.9 },
         "qwen3:4b":    { "temperature": 0.1, "top_p": 0.4 },
-        "gemma3:4b":   { "temperature": 0.1, "top_p": 0.9 },
-        "gemma3:12b":  { "temperature": 0.1, "top_p": 0.9 },
         "gemma4:latest": { "temperature": 0.1, "top_p": 0.9 },
+        "gemma4:26b":  { "temperature": 0.1, "top_p": 0.9 },
+        "gemma4:31b-mlx": { "temperature": 0.1, "top_p": 0.9 },
         "mistral:7b":  { "temperature": 0.1, "top_p": 0.9 }
       }
     },

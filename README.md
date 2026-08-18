@@ -126,14 +126,75 @@ Authoring: [`docs/authoring-a-rubric.md`](docs/authoring-a-rubric.md). Architect
 
 ## How it works
 
-```
-PDF ──▶ per-section LLM extraction ──▶ JSON Resume
-     ──▶ optional GitHub enrichment
-     ──▶ score against each selected rubric
-     ──▶ score + evidence + bonus/deductions + strengths/gaps
+```mermaid
+flowchart LR
+    UI["Next.js wizard"] --> API["FastAPI"]
+    CLI["Typer CLI"] --> PIPE
+    API --> PIPE
+
+    subgraph PIPE["evaluate()"]
+        direction TB
+        A["PDF → markdown"] --> B["Per-section<br/>LLM extraction"]
+        B --> C["JSON Resume"]
+        C --> D["GitHub enrichment<br/>(optional)"]
+        D --> E["Score against<br/>each rubric"]
+        C --> E
+    end
+
+    R[("cv_eval/rubrics/")] --> PIPE
+    PIPE --> OUT["EvaluationResult"]
+    PIPE -.->|"LLM calls"| OL["Ollama<br/>local model"]
 ```
 
+Extraction is one LLM call per resume section; scoring is one call per selected rubric. Local models frequently ignore JSON-schema mode, so the provider retries without it and the parser recovers JSON from free-text-wrapped replies — a model that cannot honour the schema still yields a parseable evaluation.
+
 LLM scores vary by model and temperature. Treat them as a structured critique, not a grade.
+
+## Sample output
+
+`POST /evaluate` returns `{ candidate_name, model, github_enriched, resume, github, evaluations[] }`. One entry from `evaluations[]`, produced by `gemma4:31b-mlx` against the `backend_engineer` rubric:
+
+```json
+{
+  "role": "backend_engineer",
+  "position_title": "Backend Engineer",
+  "categories": [
+    {
+      "key": "systems_apis",
+      "label": "Systems & APIs",
+      "icon": "🔌",
+      "score": 30.0,
+      "max": 30,
+      "evidence": "Owned shipment-tracking API (4.2k req/s peak, 38 consumers) with measured p99 latency reduction from 840ms to 145ms; built idempotent billing ledger handling $40M/yr."
+    },
+    {
+      "key": "reliability",
+      "label": "Reliability & Operations",
+      "icon": "🛡",
+      "score": 20.0,
+      "max": 20,
+      "evidence": "On-call lead who defined SLOs (99.95% availability) and drove MTTR reduction from 47min to 12min over four quarters."
+    }
+  ],
+  "total_score": 100.0,
+  "total_max": 100.0,
+  "bonus_points": 12.0,
+  "bonus_breakdown": "+5 for exceptional scale (4.2k req/s, 90M events/day, 4.1TB DB), +4 for maintaining pgqueue (2.1k stars), +3 for end-to-end ownership from RFC to SLOs.",
+  "deductions": 5.0,
+  "deduction_reasons": "-5 for named technologies (Go, Python, Kubernetes, Terraform, OpenTelemetry) appearing in skills list without described usage in experience bullets.",
+  "key_strengths": [
+    "Proven ability to optimize high-throughput APIs with quantified latency improvements",
+    "Expertise in large-scale database migrations and data consistency patterns"
+  ],
+  "areas_for_improvement": [
+    "Infrastructure tools (Kubernetes, Terraform) are listed but their specific application in the candidate's architecture is not described"
+  ],
+  "overall": 107.0,
+  "max_final_score": 115
+}
+```
+
+Categories are abridged here; the real response returns all five. Every score carries the evidence that produced it, which is the point — a number you cannot audit is not useful feedback.
 
 ## Layout
 

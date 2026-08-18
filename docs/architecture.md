@@ -30,7 +30,7 @@
 cv_eval/
 ├── _bootstrap.py    # puts core/ on sys.path (core uses flat imports)
 ├── providers.py     # model resolution, Ollama auto-detect, ResilientProvider
-├── roles.py         # load/validate rubrics from roles/
+├── roles.py         # load/validate rubrics from cv_eval/rubrics/ (or CV_EVAL_ROLES_DIR)
 ├── pipeline.py      # evaluate(): extract → enrich → score → EvaluationResult
 ├── report.py        # render EvaluationResult → text / HTML
 ├── api.py           # FastAPI (health, models, roles, evaluate)

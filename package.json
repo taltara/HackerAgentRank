@@ -1,0 +1,15 @@
+{
+  "name": "cv-evaluator",
+  "private": true,
+  "description": "Local-first CV scoring against explainable hiring rubrics.",
+  "license": "MIT",
+  "bin": {
+    "cv-evaluator": "./packages/launcher/bin/cv-evaluator.js"
+  },
+  "scripts": {
+    "start": "node packages/launcher/bin/cv-evaluator.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

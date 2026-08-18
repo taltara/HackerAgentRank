@@ -78,3 +78,34 @@ export function applyMonotonicFloor(
   if (previous == null) return next;
   return Math.min(previous, next);
 }
+
+/**
+ * Fraction of planned stages complete, 0.06–0.99.
+ *
+ * A running stage is credited by elapsed/prior, not a flat 0.45, so the bar
+ * keeps climbing while ETA says "Less than a minute". Once the prior is
+ * exhausted ("Finishing…") that stage counts as complete and the bar sits at
+ * 99 until the results step. 100 is reserved for that step.
+ */
+export function progressRatio(
+  stages: StageRef[],
+  currentStartedAt: number | null,
+  now: number,
+): number {
+  if (!stages.length) return 0.06;
+
+  let units = 0;
+  for (const stage of stages) {
+    if (isFinished(stage.status)) {
+      units += 1;
+      continue;
+    }
+    if (stage.status !== "running" || currentStartedAt == null) continue;
+
+    const elapsed = Math.max(0, (now - currentStartedAt) / 1000);
+    const prior = priorFor(stage.id);
+    units += prior <= 0 ? 1 : Math.min(1, elapsed / prior);
+  }
+
+  return Math.min(0.99, Math.max(0.06, units / stages.length));
+}

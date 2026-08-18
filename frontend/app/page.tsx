@@ -129,6 +129,7 @@ export default function Home() {
     <AppShell
       step={ev.step}
       connection={connectionState(ev.backendOk)}
+      evaluating={ev.step === "run" && ev.status === "running"}
       footer={
         <div className="mt-10 flex items-center justify-between gap-3">
           <button

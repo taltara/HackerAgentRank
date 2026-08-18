@@ -11,6 +11,7 @@ interface AppShellProps {
   connection: ConnectionState;
   children: ReactNode;
   footer?: ReactNode;
+  evaluating?: boolean;
 }
 
 function statusClass(connection: ConnectionState): string {
@@ -63,10 +64,19 @@ export default function AppShell({
   connection,
   children,
   footer,
+  evaluating = false,
 }: AppShellProps) {
   return (
-    <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-8 md:px-8 md:py-12">
-      <header className="mb-10 flex items-start justify-between gap-4">
+    <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-8 md:px-8 md:py-12">
+      <div
+        className="pointer-events-none fixed inset-0 overflow-hidden"
+        aria-hidden
+      >
+        <div className={`orb orb-gold ${evaluating ? "is-active" : ""}`} />
+        <div className={`orb orb-teal ${evaluating ? "is-active" : ""}`} />
+      </div>
+
+      <header className="relative z-10 mb-10 flex items-start justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-gold">
             Local-first
@@ -83,7 +93,7 @@ export default function AppShell({
         </div>
       </header>
 
-      <div className="grid flex-1 gap-10 lg:grid-cols-[220px_1fr]">
+      <div className="relative z-10 grid flex-1 gap-10 lg:grid-cols-[220px_1fr]">
         <aside className="hidden lg:block">
           <StepperRail current={step} />
         </aside>

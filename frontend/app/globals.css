@@ -12,13 +12,111 @@ body {
   background: #07070b;
 }
 
-body {
-  background-image:
-    radial-gradient(1200px 600px at 80% -10%, rgba(232, 197, 71, 0.12), transparent 55%),
-    radial-gradient(800px 400px at -10% 90%, rgba(45, 212, 191, 0.08), transparent 50%);
-}
-
 select option {
   background: #07070b;
   color: #fff;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.orb-gold {
+  width: min(1200px, 95vw);
+  height: 620px;
+  top: -18%;
+  right: -22%;
+  background: radial-gradient(
+    closest-side,
+    rgba(232, 197, 71, 0.16),
+    transparent 72%
+  );
+}
+
+.orb-teal {
+  width: min(860px, 80vw);
+  height: 440px;
+  bottom: -14%;
+  left: -18%;
+  background: radial-gradient(
+    closest-side,
+    rgba(45, 212, 191, 0.11),
+    transparent 72%
+  );
+}
+
+.orb-gold.is-active {
+  animation: orb-drift-a 22s ease-in-out infinite;
+}
+
+.orb-teal.is-active {
+  animation: orb-drift-b 28s ease-in-out infinite;
+}
+
+@keyframes orb-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-14vw, 12vh, 0) scale(1.12);
+  }
+}
+
+@keyframes orb-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(12vw, -10vh, 0) scale(1.16);
+  }
+}
+
+.progress-fill.is-live {
+  animation: bar-pulse 1.8s ease-in-out infinite;
+}
+
+.progress-fill.is-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  animation: bar-sheen 2.2s ease-in-out infinite;
+}
+
+@keyframes bar-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.35);
+  }
+}
+
+@keyframes bar-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-gold.is-active,
+  .orb-teal.is-active,
+  .progress-fill.is-live,
+  .progress-fill.is-live::after {
+    animation: none;
+  }
 }

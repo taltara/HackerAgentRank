@@ -12,6 +12,7 @@ node_modules/
 .next/
 out/
 dist/
+*.tsbuildinfo
 npm-debug.log*
 
 # Env

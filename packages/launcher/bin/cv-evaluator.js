@@ -7,7 +7,7 @@ ${bold("cv-evaluator")} — local-first CV scoring against explainable hiring ru
 
 ${bold("Usage")}
   npx cv-evaluator                 Start the API and web UI, then open a browser
-  npx cv-evaluator score <cv.pdf>  Score a CV from the terminal
+  npx cv-evaluator evaluate <cv.pdf>  Score a CV from the terminal
   npx cv-evaluator roles           List the available rubrics
 
 ${bold("Options")}

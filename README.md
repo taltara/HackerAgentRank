@@ -34,10 +34,19 @@ npx cv-evaluator
 
 That checks your environment, provisions both services, and opens the UI at `http://localhost:3000`. Ports are configurable with `--api-port` and `--web-port`.
 
-Just want the CLI, no Node?
+From a clone, the same launcher is local (no registry needed):
 
 ```bash
-uvx cv-eval score cv.pdf --role backend_engineer
+npx .
+```
+
+Just want the CLI, no Node? From a clone:
+
+```bash
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python -m cv_eval evaluate cv.pdf --role backend_engineer
 ```
 
 <details>
@@ -68,7 +77,7 @@ npm run dev                  # http://localhost:3000
 
 ### On packaging
 
-The pipeline is Python and is published to PyPI as [`cv-eval`](https://pypi.org/project/cv-eval/). The npm package [`cv-evaluator`](https://www.npmjs.com/package/cv-evaluator) is a **launcher only** — it has zero dependencies and never reimplements pipeline logic, it just provisions and supervises the two services. Shipping the evaluation logic itself as JavaScript would wrap a subprocess and lie about the runtime.
+The pipeline is Python. The npm package [`cv-evaluator`](https://www.npmjs.com/package/cv-evaluator) is a **launcher only** — it has zero dependencies and never reimplements pipeline logic, it just provisions and supervises the two services. Shipping the evaluation logic itself as JavaScript would wrap a subprocess and lie about the runtime. A PyPI package (`cv-eval`) is a later step, not required to run the UI.
 
 GitHub enrichment is **off** by default. Unauthenticated GitHub allows 60 requests/hour; set `GITHUB_TOKEN` in `backend/.env` if you turn it on.
 

@@ -12,15 +12,6 @@ interface ProgressStepProps {
   error: string;
 }
 
-function progressPct(stages: LiveStage[]): number {
-  if (!stages.length) return 6;
-  const finished = stages.filter(
-    (s) => s.status === "done" || s.status === "skipped" || s.status === "error",
-  ).length;
-  const running = stages.filter((s) => s.status === "running").length;
-  return Math.min(99, Math.round(((finished + running * 0.45) / stages.length) * 100));
-}
-
 function stageMark(status: LiveStage["status"]): string {
   switch (status) {
     case "running":
@@ -47,8 +38,8 @@ export default function ProgressStep({
   error,
 }: ProgressStepProps) {
   const eta = useEta(stages, startedAt);
-  const pct = progressPct(stages);
   const current = stages.find((s) => s.status === "running");
+  const live = !error && (Boolean(current) || eta.label === "Wrapping up");
 
   return (
     <div className="space-y-8">
@@ -60,19 +51,21 @@ export default function ProgressStep({
           Evaluating
         </h2>
         <p className="mt-3 text-sm text-mist">
-          {current ? current.label : eta}
+          {current ? current.label : eta.label}
         </p>
       </div>
 
       <div>
         <div className="mb-2 flex items-end justify-between font-mono text-[11px] text-mist">
-          <span>{pct}%</span>
-          <span>{eta}</span>
+          <span>{eta.percent}%</span>
+          <span>{eta.label}</span>
         </div>
         <div className="h-1 overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full bg-gold transition-all duration-700 ease-out"
-            style={{ width: `${pct}%` }}
+            className={`progress-fill relative h-full overflow-hidden bg-gold transition-[width] duration-700 ease-out ${
+              live ? "is-live" : ""
+            }`}
+            style={{ width: `${eta.percent}%` }}
           />
         </div>
       </div>

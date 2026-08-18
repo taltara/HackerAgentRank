@@ -10,10 +10,11 @@ enable GitHub enrichment.
 
 ## Install
 
+From this repository:
+
 ```bash
-pip install cv-eval
-# or, without installing:
-uvx cv-eval --help
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
 ```
 
 You also need Ollama running with at least one model pulled:
@@ -29,10 +30,10 @@ ollama pull gemma3:12b
 cv-eval roles
 
 # score a CV against one or more rubrics
-cv-eval score resume.pdf --role backend_engineer --role senior_full_stack_engineer
+cv-eval evaluate resume.pdf --role backend_engineer --role senior_full_stack_engineer
 
 # serve the HTTP API used by the web UI
-cv-eval serve --port 8000
+uvicorn cv_eval.api:app --port 8000
 ```
 
 ## Rubrics

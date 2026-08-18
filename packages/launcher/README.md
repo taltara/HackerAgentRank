@@ -33,7 +33,7 @@ is missing.
 ```bash
 npx cv-evaluator                      # start the API and web UI
 npx cv-evaluator roles                # list the available rubrics
-npx cv-evaluator score cv.pdf --role backend_engineer
+npx cv-evaluator evaluate cv.pdf --role backend_engineer
 ```
 
 | Option           | Default | Description                                 |
@@ -55,10 +55,13 @@ CLI.
 
 ## Prefer to skip Node entirely?
 
-The CLI is available directly from PyPI:
+From a clone of this repository:
 
 ```bash
-uvx cv-eval score cv.pdf --role backend_engineer
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python -m cv_eval evaluate cv.pdf --role backend_engineer
 ```
 
 The launcher is only worth it when you want the web UI too.

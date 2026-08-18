@@ -1,0 +1,41 @@
+{
+    "position_title": "Backend Engineer",
+    "department": "Engineering",
+    "source": "community",
+    "description": "Services, data stores, APIs, and production reliability for backend-focused engineers.",
+    "categories": [
+        {
+            "key": "systems_apis",
+            "label": "Systems & APIs",
+            "max": 30,
+            "icon": "🔌"
+        },
+        {
+            "key": "data_storage",
+            "label": "Data & Storage",
+            "max": 20,
+            "icon": "🗄"
+        },
+        {
+            "key": "reliability",
+            "label": "Reliability & Operations",
+            "max": 20,
+            "icon": "🛡"
+        },
+        {
+            "key": "quality",
+            "label": "Quality & Testing",
+            "max": 15,
+            "icon": "✅"
+        },
+        {
+            "key": "collaboration",
+            "label": "Collaboration",
+            "max": 15,
+            "icon": "🤝"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

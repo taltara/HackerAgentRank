@@ -1,0 +1,41 @@
+{
+    "position_title": "Product Designer",
+    "department": "Design",
+    "source": "community",
+    "description": "Product design: research, craft, systems, and shipped UX outcomes.",
+    "categories": [
+        {
+            "key": "research",
+            "label": "Research & Insight",
+            "max": 20,
+            "icon": "🔎"
+        },
+        {
+            "key": "craft",
+            "label": "Interaction & Visual Craft",
+            "max": 30,
+            "icon": "✨"
+        },
+        {
+            "key": "systems",
+            "label": "Design Systems",
+            "max": 15,
+            "icon": "🧩"
+        },
+        {
+            "key": "collaboration",
+            "label": "Collaboration",
+            "max": 15,
+            "icon": "🤝"
+        },
+        {
+            "key": "impact",
+            "label": "Shipped Impact",
+            "max": 20,
+            "icon": "🚀"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

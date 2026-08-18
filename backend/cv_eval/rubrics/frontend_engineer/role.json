@@ -1,0 +1,41 @@
+{
+    "position_title": "Frontend Engineer",
+    "department": "Engineering",
+    "source": "community",
+    "description": "User interfaces, accessibility, performance, and product-facing engineering.",
+    "categories": [
+        {
+            "key": "product_ui",
+            "label": "Product UI",
+            "max": 30,
+            "icon": "🖥"
+        },
+        {
+            "key": "engineering_quality",
+            "label": "Engineering Quality",
+            "max": 20,
+            "icon": "🧱"
+        },
+        {
+            "key": "performance_a11y",
+            "label": "Performance & Accessibility",
+            "max": 20,
+            "icon": "⚡️"
+        },
+        {
+            "key": "design_collaboration",
+            "label": "Design Collaboration",
+            "max": 15,
+            "icon": "🎨"
+        },
+        {
+            "key": "delivery",
+            "label": "Delivery",
+            "max": 15,
+            "icon": "📦"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

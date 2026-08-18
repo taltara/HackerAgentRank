@@ -1,0 +1,41 @@
+{
+    "position_title": "Engineering Manager",
+    "department": "Engineering",
+    "source": "community",
+    "description": "Team leadership, delivery, hiring, and technical judgment for engineering managers.",
+    "categories": [
+        {
+            "key": "team_leadership",
+            "label": "Team Leadership",
+            "max": 30,
+            "icon": "👥"
+        },
+        {
+            "key": "delivery",
+            "label": "Delivery & Outcomes",
+            "max": 25,
+            "icon": "📦"
+        },
+        {
+            "key": "technical_judgment",
+            "label": "Technical Judgment",
+            "max": 20,
+            "icon": "🧭"
+        },
+        {
+            "key": "hiring_growth",
+            "label": "Hiring & Growth",
+            "max": 15,
+            "icon": "🌱"
+        },
+        {
+            "key": "org_collaboration",
+            "label": "Org Collaboration",
+            "max": 10,
+            "icon": "🔗"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

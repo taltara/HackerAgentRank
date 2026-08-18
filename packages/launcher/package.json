@@ -1,0 +1,35 @@
+{
+    "name": "cv-evaluator",
+    "version": "0.1.0",
+    "description": "One-command launcher for CV Evaluator: local-first CV scoring against explainable hiring rubrics.",
+    "keywords": [
+        "cv",
+        "resume",
+        "hiring",
+        "rubric",
+        "llm",
+        "ollama",
+        "local-first"
+    ],
+    "homepage": "https://github.com/taltara/HackerAgentRank",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/taltara/HackerAgentRank.git",
+        "directory": "packages/launcher"
+    },
+    "bugs": "https://github.com/taltara/HackerAgentRank/issues",
+    "license": "MIT",
+    "author": "TALOS",
+    "type": "module",
+    "bin": {
+        "cv-evaluator": "bin/cv-evaluator.js"
+    },
+    "files": [
+        "bin",
+        "src",
+        "README.md"
+    ],
+    "engines": {
+        "node": ">=20"
+    }
+}

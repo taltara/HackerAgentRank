@@ -1,0 +1,41 @@
+{
+    "position_title": "Product Manager",
+    "department": "Product",
+    "source": "community",
+    "description": "Problem discovery, product sense, delivery, and measured outcomes for PMs.",
+    "categories": [
+        {
+            "key": "discovery",
+            "label": "Discovery & Insight",
+            "max": 25,
+            "icon": "🔍"
+        },
+        {
+            "key": "product_sense",
+            "label": "Product Sense",
+            "max": 25,
+            "icon": "🧭"
+        },
+        {
+            "key": "execution",
+            "label": "Execution",
+            "max": 20,
+            "icon": "📋"
+        },
+        {
+            "key": "outcomes",
+            "label": "Outcomes",
+            "max": 20,
+            "icon": "📈"
+        },
+        {
+            "key": "collaboration",
+            "label": "Collaboration",
+            "max": 10,
+            "icon": "🤝"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

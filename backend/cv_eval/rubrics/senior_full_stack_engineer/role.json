@@ -1,0 +1,47 @@
+{
+    "position_title": "Senior / Full-Stack Software Engineer",
+    "department": "Engineering",
+    "source": "community",
+    "description": "Experienced software engineers: production systems, architecture, leadership, and technical breadth.",
+    "categories": [
+        {
+            "key": "production_systems",
+            "label": "Production Systems",
+            "max": 30,
+            "icon": "🛠"
+        },
+        {
+            "key": "architecture",
+            "label": "Architecture & Design",
+            "max": 20,
+            "icon": "🏗"
+        },
+        {
+            "key": "leadership",
+            "label": "Leadership & Impact",
+            "max": 15,
+            "icon": "🌟"
+        },
+        {
+            "key": "open_source",
+            "label": "Open Source",
+            "max": 15,
+            "icon": "⚡"
+        },
+        {
+            "key": "self_projects",
+            "label": "Personal Projects",
+            "max": 10,
+            "icon": "🚀"
+        },
+        {
+            "key": "breadth",
+            "label": "Technical Breadth",
+            "max": 10,
+            "icon": "🧩"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

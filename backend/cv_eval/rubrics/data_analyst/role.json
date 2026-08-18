@@ -1,0 +1,41 @@
+{
+    "position_title": "Data Analyst",
+    "department": "Data & ML",
+    "source": "community",
+    "description": "Analysis quality, metrics, stakeholder communication, and decision impact.",
+    "categories": [
+        {
+            "key": "analysis",
+            "label": "Analysis Quality",
+            "max": 30,
+            "icon": "📉"
+        },
+        {
+            "key": "metrics",
+            "label": "Metrics & Experimentation",
+            "max": 20,
+            "icon": "🧪"
+        },
+        {
+            "key": "tooling",
+            "label": "Data Tooling",
+            "max": 20,
+            "icon": "🧮"
+        },
+        {
+            "key": "communication",
+            "label": "Communication",
+            "max": 20,
+            "icon": "🗣"
+        },
+        {
+            "key": "impact",
+            "label": "Decision Impact",
+            "max": 10,
+            "icon": "📌"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

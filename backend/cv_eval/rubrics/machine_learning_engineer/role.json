@@ -1,0 +1,41 @@
+{
+    "position_title": "Machine Learning Engineer",
+    "department": "Data & ML",
+    "source": "community",
+    "description": "Applied ML: problem framing, models in production, evaluation, and data quality.",
+    "categories": [
+        {
+            "key": "problem_framing",
+            "label": "Problem Framing",
+            "max": 20,
+            "icon": "🎯"
+        },
+        {
+            "key": "modeling",
+            "label": "Modeling",
+            "max": 25,
+            "icon": "🧠"
+        },
+        {
+            "key": "production_ml",
+            "label": "Production ML",
+            "max": 25,
+            "icon": "🏭"
+        },
+        {
+            "key": "evaluation",
+            "label": "Evaluation & Data",
+            "max": 20,
+            "icon": "📊"
+        },
+        {
+            "key": "engineering",
+            "label": "ML Engineering",
+            "max": 10,
+            "icon": "🛠"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

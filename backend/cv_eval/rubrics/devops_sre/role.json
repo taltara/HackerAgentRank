@@ -1,0 +1,41 @@
+{
+    "position_title": "DevOps / Site Reliability Engineer",
+    "department": "Engineering",
+    "source": "community",
+    "description": "Infrastructure, delivery, observability, and reliability engineering.",
+    "categories": [
+        {
+            "key": "infrastructure",
+            "label": "Infrastructure",
+            "max": 30,
+            "icon": "☁️"
+        },
+        {
+            "key": "delivery",
+            "label": "Delivery & Automation",
+            "max": 20,
+            "icon": "🔁"
+        },
+        {
+            "key": "reliability",
+            "label": "Reliability",
+            "max": 20,
+            "icon": "📈"
+        },
+        {
+            "key": "security",
+            "label": "Security & Compliance",
+            "max": 15,
+            "icon": "🔐"
+        },
+        {
+            "key": "enablement",
+            "label": "Platform Enablement",
+            "max": 15,
+            "icon": "🧰"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

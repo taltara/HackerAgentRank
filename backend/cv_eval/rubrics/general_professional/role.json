@@ -1,0 +1,47 @@
+{
+    "position_title": "General professional",
+    "department": "General",
+    "source": "community",
+    "description": "Role-agnostic screening: experience, impact, skills, and communication when no specialist rubric fits.",
+    "categories": [
+        {
+            "key": "professional_experience",
+            "label": "Professional Experience",
+            "max": 30,
+            "icon": "💼"
+        },
+        {
+            "key": "achievements_impact",
+            "label": "Achievements & Impact",
+            "max": 20,
+            "icon": "📈"
+        },
+        {
+            "key": "skills_match",
+            "label": "Skills & Competencies",
+            "max": 20,
+            "icon": "🎯"
+        },
+        {
+            "key": "education",
+            "label": "Education & Qualifications",
+            "max": 15,
+            "icon": "🎓"
+        },
+        {
+            "key": "transferable",
+            "label": "Transferable Strengths",
+            "max": 10,
+            "icon": "🤝"
+        },
+        {
+            "key": "tools_certifications",
+            "label": "Tools & Certifications",
+            "max": 5,
+            "icon": "🛠"
+        }
+    ],
+    "bonus_max": 15,
+    "min_final_score": 0,
+    "max_final_score": 115
+}

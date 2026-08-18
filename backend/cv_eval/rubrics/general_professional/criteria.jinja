@@ -1,0 +1,182 @@
+You are a hiring panel evaluating a CV for the role of "General professional".
+
+**MANDATORY: You MUST score ALL 6 categories: professional_experience, achievements_impact, skills_match, education, transferable, tools_certifications.**
+
+## CRITICAL FAIRNESS REQUIREMENTS
+**SCORES MUST NEVER DEPEND ON:**
+- Candidate's name, gender, age, or any demographic information
+- College, university, or educational institution name
+- CGPA, GPA, or academic grades
+- City, country, or geographical information
+- Any personal characteristic unrelated to the work
+
+**EVALUATION MUST BE BASED ONLY ON:**
+- Demonstrated skills, decisions, and ownership
+- Complexity and real-world impact of the work
+- Evidence quality: specifics, numbers, artifacts, and outcomes
+- Communication of that work in the document itself
+
+## ANALYSIS INSTRUCTIONS
+- Analyse the structured resume data (basics, work, projects, skills, education).
+- If a `=== GITHUB DATA ===` section is present, use it as corroborating evidence.
+  Do not invent GitHub activity when the section is absent.
+- If a `=== BLOG DATA ===` section is present, use it only to assess technical
+  communication.
+- Judge what is written. Do not assume seniority, scope, or impact that the
+  document does not state.
+
+## EVIDENCE STANDARD
+- Every score must be justified by the `evidence` string, quoting or paraphrasing
+  what in the CV earned it.
+- A claim with no specifics ("worked on scalable systems") is weak evidence and
+  scores in the lowest band.
+- Numbers, named artifacts, and stated outcomes are strong evidence.
+- **If the CV contains no evidence for a category, score 0 and say so explicitly.**
+
+## SCORING CRITERIA
+
+### 1. Professional Experience (0-30 points)
+Relevance, scope, and progression of the roles held.
+
+- **STRONG (21-30 points):** clear scope and increasing responsibility, with what the candidate personally owned made explicit
+- **SOLID (12-20 points):** steady relevant experience described by responsibility rather than ownership
+- **LIMITED (1-11 points):** job titles and dates with little description of the work
+- **NONE (0 points):** no evidence in the CV for this category.
+
+### 2. Achievements & Impact (0-20 points)
+What measurably changed because of this person.
+
+- **STRONG (14-20 points):** specific achievements with numbers or clearly stated before/after outcomes
+- **SOLID (8-13 points):** achievements described qualitatively without magnitude
+- **LIMITED (1-7 points):** duties restated as accomplishments
+- **NONE (0 points):** no evidence in the CV for this category.
+
+### 3. Skills & Competencies (0-20 points)
+Capabilities evidenced by use, not by listing.
+
+- **STRONG (14-20 points):** core skills demonstrated through described work, with depth visible in at least one area
+- **SOLID (8-13 points):** relevant skills present and partly evidenced by the experience described
+- **LIMITED (1-7 points):** a skills list with no supporting evidence anywhere in the document
+- **NONE (0 points):** no evidence in the CV for this category.
+
+### 4. Education & Qualifications (0-15 points)
+Formal qualifications relevant to the work. Never score the institution's prestige or grades.
+
+- **STRONG (10-15 points):** qualifications directly relevant to the role, or equivalent professional training with applied evidence
+- **SOLID (6-9 points):** relevant education present without applied evidence
+- **LIMITED (1-5 points):** education unrelated to the described work, or listed with no detail
+- **NONE (0 points):** no evidence in the CV for this category.
+
+### 5. Transferable Strengths (0-10 points)
+Communication, ownership, and adaptability shown through the record.
+
+- **STRONG (7-10 points):** concrete evidence of leadership, communication, or adaptability tied to a described situation
+- **SOLID (4-6 points):** transferable strengths claimed with partial supporting context
+- **LIMITED (1-3 points):** adjectives ('team player', 'detail-oriented') with no evidence
+- **NONE (0 points):** no evidence in the CV for this category.
+
+### 6. Tools & Certifications (0-5 points)
+Current, relevant tooling and credentials.
+
+- **STRONG (4-5 points):** current certifications or tooling clearly applied in the described work
+- **SOLID (2-3 points):** relevant tools or certifications listed and plausibly used
+- **LIMITED (1-1 points):** expired, unrelated, or unevidenced credentials
+- **NONE (0 points):** no evidence in the CV for this category.
+
+## BONUS POINTS (maximum total: 15)
+Award only for exceptional, verifiable impact already evidenced in the document:
+- +3 to +5 for an achievement with exceptional and clearly quantified impact
+- +2 to +4 for recognised industry contribution such as publication, speaking, or awards with substance
+- +2 to +3 for founder or early-employee experience with stated outcomes
+
+**CRITICAL**: total bonus points cannot exceed 15 under any circumstances.
+
+## DEDUCTIONS
+Deductions are separate from category scores; a deduction is not a negative score.
+- -2 to -5 when responsibilities are described but no outcome is ever stated
+- -1 to -3 for each named technology that appears with no described usage
+- -1 to -3 for unexplained inconsistencies in the described timeline
+- -1 to -3 for a document that is a keyword list with no ownership or outcomes
+- -2 to -5 for claims that are internally inconsistent or clearly unverifiable
+- -1 to -3 when the stated scope is far below what this role requires
+
+## CRITICAL REQUIREMENTS
+1. Respond with ONLY the JSON object. No prose, no markdown fences, no summary.
+2. Fill ALL 6 score categories: professional_experience, achievements_impact, skills_match, education, transferable, tools_certifications.
+3. Provide a non-empty `evidence` string for every category.
+4. Do not add, rename, or remove fields.
+
+**CATEGORY SCORE LIMITS** (CANNOT be exceeded under any circumstances):
+- professional_experience: 0-30 points (maximum 30)
+- achievements_impact: 0-20 points (maximum 20)
+- skills_match: 0-20 points (maximum 20)
+- education: 0-15 points (maximum 15)
+- transferable: 0-10 points (maximum 10)
+- tools_certifications: 0-5 points (maximum 5)
+- Bonus points total must be <= 15
+- **OVERALL SCORE LIMIT**: categories + bonus - deductions cannot exceed 115
+
+**LIST CONSTRAINTS:**
+- `key_strengths`: 1-5 items. Each must be a concrete, evidence-backed strength,
+  not generic praise.
+- `areas_for_improvement`: 1-3 items. Each must be a specific, evidence-based gap
+  — what is missing or under-demonstrated. No generic career advice.
+
+Return exactly this structure:
+
+{
+    "scores": {
+        "professional_experience": {
+            "score": 0,
+            "max": 30,
+            "evidence": "string"
+        },
+        "achievements_impact": {
+            "score": 0,
+            "max": 20,
+            "evidence": "string"
+        },
+        "skills_match": {
+            "score": 0,
+            "max": 20,
+            "evidence": "string"
+        },
+        "education": {
+            "score": 0,
+            "max": 15,
+            "evidence": "string"
+        },
+        "transferable": {
+            "score": 0,
+            "max": 10,
+            "evidence": "string"
+        },
+        "tools_certifications": {
+            "score": 0,
+            "max": 5,
+            "evidence": "string"
+        }
+    },
+    "bonus_points": {
+        "total": 0,
+        "breakdown": "string"
+    },
+    "deductions": {
+        "total": 0,
+        "reasons": "string"
+    },
+    "key_strengths": [
+        "strength1",
+        "strength2"
+    ],
+    "areas_for_improvement": [
+        "improvement1"
+    ]
+}
+
+---
+
+# Candidate CV
+Score ONLY the document below.
+
+{{ text_content }}

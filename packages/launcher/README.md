@@ -22,7 +22,11 @@ It has **zero runtime dependencies** and never reimplements pipeline logic.
 
 - **Python 3.11+**
 - **Node.js 20+**
-- **[Ollama](https://ollama.com)** with a pulled model, **or** a Gemini / Ollama Cloud key on wizard step 03
+- **[Ollama](https://ollama.com)** with any model pulled, **or** a Gemini / Ollama Cloud key on wizard step 03
+
+The backend picks the model from what you have — `DEFAULT_MODEL`, then a
+preferred Gemma 4 build, then any other `gemma4*`, then the first local model
+Ollama reports. Pulling a specific tag is a suggestion, not a requirement.
 
 The launcher checks Python and Node before doing anything. Local Ollama is
 optional for the web UI: if it is missing, you can still paste a cloud key.

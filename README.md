@@ -23,11 +23,21 @@ HackerRank's hiring-agent is a strong intern scoring pipeline. It is also a sing
 
 - **Python 3.11+**
 - **Node.js 20+** (web UI only)
-- An LLM: **[Ollama](https://ollama.com)** with a pulled model (`gemma4:latest` is the local default), **or** a Gemini / Ollama Cloud API key pasted on wizard step 03
+- An LLM: **[Ollama](https://ollama.com)** with any model pulled, **or** a Gemini / Ollama Cloud API key pasted on wizard step 03
 
 ## Quick start
 
-Local Gemma 4 is the default path. No GPU? Skip the Ollama pull and paste a Gemini or Ollama Cloud key on step 03. The key is used for that evaluation only — never written to disk, `.env`, logs, or SSE.
+Local Gemma 4 is the default path, but the model is chosen from what you
+actually have rather than pinned to one tag. In order: a `DEFAULT_MODEL`
+environment variable, then a preferred Gemma 4 build (`gemma4:31b-mlx`,
+`gemma4:latest`, `gemma4:26b`), then any other `gemma4*` you have pulled, then
+whatever local model Ollama reports first. So `ollama pull gemma4:latest` below
+is a good starting point, not a requirement — if you already run a local model,
+it will be used. `GET /models` shows what was found and what is selected.
+
+No GPU? Skip the Ollama pull and paste a Gemini or Ollama Cloud key on step 03.
+The key is used for that evaluation only — never written to disk, `.env`, logs,
+or SSE.
 
 Ollama (optional if you use a cloud key):
 

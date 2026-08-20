@@ -206,6 +206,9 @@ class ResilientProvider:
         self.base_url = base_url
         self.structured_output = structured_output
         self._api_key = api_key
+        # Last redacted LLM failure, or None. Read by the pipeline so a
+        # provider error is not reported as a bad document.
+        self.last_error: Optional[str] = None
         self._primary = OpenAICompatibleProvider(
             base_url=base_url,
             api_key=api_key,
@@ -228,13 +231,26 @@ class ResilientProvider:
     ):
         primary_kwargs = dict(kwargs)
         try:
-            return self._primary.chat(model=model, messages=messages, options=options, **primary_kwargs)
+            result = self._primary.chat(model=model, messages=messages, options=options, **primary_kwargs)
+            self.last_error = None
+            return result
         except Exception as exc:  # noqa: BLE001 - we deliberately catch broad here
+            # Remembered so a caller can say *why* a later step had no data.
+            # Without it, an auth failure surfaces as "your PDF is unreadable".
+            self.last_error = redact_secret(str(exc), self._api_key)
             # Only fall back when structured output was actually requested.
             if "format" in primary_kwargs or self.structured_output != "none":
                 logging.getLogger(__name__).warning(
                     "Structured-output request failed (%s); retrying without it.",
-                    redact_secret(str(exc), self._api_key),
+                    self.last_error,
                 )
-                return self._fallback.chat(model=model, messages=messages, options=options, **primary_kwargs)
+                try:
+                    result = self._fallback.chat(
+                        model=model, messages=messages, options=options, **primary_kwargs
+                    )
+                except Exception as fallback_exc:  # noqa: BLE001
+                    self.last_error = redact_secret(str(fallback_exc), self._api_key)
+                    raise
+                self.last_error = None
+                return result
             raise

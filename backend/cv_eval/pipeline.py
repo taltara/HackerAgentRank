@@ -311,6 +311,16 @@ def evaluate(
 
     resume = extract_resume(cv_bytes, provider, on_event=on_event)
     if resume is None:
+        # Blaming the document is only right when the model was reachable.
+        # A rejected API key fails here too, and telling someone to re-export
+        # their CV sends them to fix the one thing that is not broken.
+        llm_error = getattr(provider, "last_error", None)
+        if llm_error:
+            raise RuntimeError(
+                f"The {runtime_id} model could not be reached, so the CV was "
+                f"never read. Check the model and, for a cloud runtime, the API "
+                f"key. Provider said: {llm_error}"
+            )
         raise RuntimeError(
             "Could not extract any structured data from the PDF. "
             "The file may be scanned/image-only or unreadable."

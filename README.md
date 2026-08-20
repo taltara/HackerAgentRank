@@ -1,6 +1,6 @@
 # CV Evaluator
 
-Local-first CV scoring against **explainable hiring rubrics**. Upload a PDF, pick one or more roles, get a category-level score with evidence — on your machine.
+Local-first CV scoring against **explainable hiring rubrics**. Upload a PDF, pick one or more roles, get a category-level score with evidence - on your machine.
 
 Built around [interviewstreet/hiring-agent](https://github.com/interviewstreet/hiring-agent) (HackerRank, MIT): we vendor that resume-to-score pipeline and wrap it with multi-rubric scoring, a FastAPI service, a Next.js UI, and a CLI.
 
@@ -14,10 +14,10 @@ Built around [interviewstreet/hiring-agent](https://github.com/interviewstreet/h
 
 HackerRank's hiring-agent is a strong intern scoring pipeline. It is also a single hardcoded rubric, a CLI, and a model layer that assumes structured JSON. This project keeps that core and adds what you need to run it as a product:
 
-- **Multi-rubric** — score one CV against several roles in one pass
-- **A catalog you can extend** — drop a folder in `backend/cv_eval/rubrics/`
-- **Local or BYOK cloud** — Ollama by default; Gemini 3.5 Flash or Ollama Cloud if you paste a key for that run
-- **Two surfaces** — web wizard and `python -m cv_eval`
+- **Multi-rubric** - score one CV against several roles in one pass
+- **A catalog you can extend** - drop a folder in `backend/cv_eval/rubrics/`
+- **Local or BYOK cloud** - Ollama by default; Gemini 3.5 Flash or Ollama Cloud if you paste a key for that run
+- **Two surfaces** - web wizard and `python -m cv_eval`
 
 ## Requirements
 
@@ -46,7 +46,7 @@ ollama serve
 ollama pull gemma4:latest
 ```
 
-### Anyone — one command
+### Anyone - one command
 
 ```bash
 npx cv-evaluator
@@ -178,7 +178,7 @@ flowchart LR
     PIPE -.->|"LLM calls"| OL["Ollama local<br/>or Gemini / Ollama Cloud"]
 ```
 
-Extraction is one LLM call per resume section; scoring is one call per selected rubric. Local models frequently ignore JSON-schema mode, so the provider retries without it and the parser recovers JSON from free-text-wrapped replies — a model that cannot honour the schema still yields a parseable evaluation.
+Extraction is one LLM call per resume section; scoring is one call per selected rubric. Local models frequently ignore JSON-schema mode, so the provider retries without it and the parser recovers JSON from free-text-wrapped replies - a model that cannot honour the schema still yields a parseable evaluation.
 
 LLM scores vary by model and temperature. Treat them as a structured critique, not a grade.
 
@@ -226,7 +226,7 @@ LLM scores vary by model and temperature. Treat them as a structured critique, n
 }
 ```
 
-Categories are abridged here; the real response returns all five. Every score carries the evidence that produced it, which is the point — a number you cannot audit is not useful feedback.
+Categories are abridged here; the real response returns all five. Every score carries the evidence that produced it, which is the point - a number you cannot audit is not useful feedback.
 
 ## Layout
 

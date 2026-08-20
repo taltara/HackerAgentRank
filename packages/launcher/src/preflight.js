@@ -3,19 +3,51 @@ import { detail, fail, ok, step, warn } from "./log.js";
 
 const OLLAMA_URL = process.env.OLLAMA_HOST || "http://127.0.0.1:11434";
 
+const MIN_MINOR = 11;
+
+/**
+ * Interpreters to try, in preference order.
+ *
+ * Two things decide this order, both learned the hard way.
+ *
+ * The versioned names have to be here at all: macOS ships 3.9 as `python3`,
+ * so someone who installed 3.12 through Homebrew still resolves the stock one
+ * and would otherwise be told Python is missing when it is sitting right there.
+ *
+ * And newest is not best. Picking 3.14 first meant pydantic-core had no
+ * prebuilt wheel, so pip tried to compile Rust and the install died. Mature
+ * minors come first because that is where the wheels are; a very new
+ * interpreter is a last resort rather than a prize.
+ */
+const PYTHON_CANDIDATES = [
+  "python3.13",
+  "python3.12",
+  "python3.11",
+  "python3",
+  "python",
+  "python3.14",
+];
+
 async function findPython() {
-  for (const candidate of ["python3", "python"]) {
+  let tooOld = null;
+  for (const candidate of PYTHON_CANDIDATES) {
     try {
       const version = await run(candidate, ["--version"]);
       const match = version.match(/(\d+)\.(\d+)/);
-      if (match && Number(match[1]) === 3 && Number(match[2]) >= 11) {
+      if (!match) continue;
+      const major = Number(match[1]);
+      const minor = Number(match[2]);
+      if (major === 3 && minor >= MIN_MINOR) {
         return { command: candidate, version: version.trim() };
       }
+      if (tooOld === null) {
+        tooOld = { command: candidate, version: version.trim() };
+      }
     } catch {
-      // try the next candidate
+      // Not installed under this name; try the next.
     }
   }
-  return null;
+  return { tooOld };
 }
 
 async function listModels() {
@@ -50,9 +82,17 @@ export async function preflight({
   let pythonCommand = null;
   if (needsPython) {
     const python = await findPython();
-    if (!python) {
-      fail("Python 3.11+ is required and was not found on PATH.");
-      detail("Install it from https://www.python.org/downloads/ and retry.");
+    if (!python || !python.command) {
+      const found = python && python.tooOld;
+      if (found) {
+        fail(`Python 3.11+ is required (found ${found.version}).`);
+        detail(
+          "Install a newer one, for example: brew install python@3.12 — then retry.",
+        );
+      } else {
+        fail("Python 3.11+ is required and was not found on PATH.");
+        detail("Install it from https://www.python.org/downloads/ and retry.");
+      }
       throw new Error("missing python");
     }
     ok(`${python.version}`);

@@ -1,6 +1,6 @@
 {
     "name": "cv-evaluator",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "description": "One-command launcher for CV Evaluator: local-first CV scoring against explainable hiring rubrics.",
     "keywords": [
         "cv",
